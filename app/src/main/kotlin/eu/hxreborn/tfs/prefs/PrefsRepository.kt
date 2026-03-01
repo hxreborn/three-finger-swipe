@@ -60,13 +60,11 @@ class PrefsRepository(
     private fun readState() =
         PrefsState(
             swipeEnabled = Prefs.SWIPE_ENABLED.read(localPrefs),
-            longPressEnabled = Prefs.LONG_PRESS_ENABLED.read(localPrefs),
             debugLogs = Prefs.DEBUG_LOGS.read(localPrefs),
         )
 }
 
 data class PrefsState(
     val swipeEnabled: Boolean = Prefs.SWIPE_ENABLED.default,
-    val longPressEnabled: Boolean = Prefs.LONG_PRESS_ENABLED.default,
     val debugLogs: Boolean = Prefs.DEBUG_LOGS.default,
 )
