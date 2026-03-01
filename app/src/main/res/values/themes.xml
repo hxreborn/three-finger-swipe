@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <style name="Theme.ThreeFingerSwipe" parent="android:Theme.Material.Light.NoActionBar">
+    <item name="android:windowBackground">@color/surface_dark</item>
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+    <item name="android:windowLightStatusBar">false</item>
+    <item name="android:windowLightNavigationBar">false</item>
+  </style>
+
+  <style name="Theme.ThreeFingerSwipe.Splash" parent="Theme.SplashScreen">
+    <item name="windowSplashScreenBackground">@color/surface_dark</item>
+    <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_animated</item>
+    <item name="windowSplashScreenAnimationDuration">500</item>
+    <item name="postSplashScreenTheme">@style/Theme.ThreeFingerSwipe</item>
+  </style>
+</resources>

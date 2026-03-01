@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">Three Finger Swipe</string>
+  <string name="app_desc">Standalone implementation of three-finger swipe screenshots using the modern LSPosed API</string>
+  <string name="category_screenshot_gesture">Screenshot gesture</string>
+  <string name="category_advanced">Advanced</string>
+  <string name="pref_swipe_title">Three-finger swipe down</string>
+  <string name="pref_swipe_summary">Take a screenshot</string>
+  <string name="pref_long_press_title">Three finger long press</string>
+  <string name="pref_long_press_summary">Press and hold with three fingers and then swipe down to take an area screenshot.</string>
+  <string name="pref_debug_title">Debug logging</string>
+  <string name="pref_debug_summary">Log gesture recognition details</string>
+</resources>
