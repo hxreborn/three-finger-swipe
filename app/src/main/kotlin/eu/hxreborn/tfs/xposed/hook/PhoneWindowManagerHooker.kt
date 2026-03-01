@@ -44,12 +44,6 @@ class PhoneWindowManagerHooker : Hooker {
                     context = bindings.systemContext,
                     prefs = prefs,
                     onSwipeDown = { ScreenshotTrigger.takeScreenshot(bindings.screenshotDispatch) },
-                    onLongPressSwipeDown = {
-                        ScreenshotTrigger.takeCropScreenshot(
-                            bindings.screenshotDispatch,
-                            bindings.systemContext,
-                        )
-                    },
                     onPilfer = { GestureInputMonitor.pilferPointers() },
                 )
             val proxy =
