@@ -23,9 +23,6 @@
     public void onSystemServerLoaded(...);
 }
 
-# ModuleSettingsStore for remote preferences
--keep class eu.hxreborn.tfs.prefs.ModuleSettingsStore { *; }
-
 # Gesture handler invoked via Proxy
 -keep class eu.hxreborn.tfs.gesture.ThreeFingerGestureHandler { *; }
 
