@@ -1,9 +1,13 @@
 package eu.hxreborn.tfs.xposed.hook
 
 import android.content.SharedPreferences
+import eu.hxreborn.tfs.gesture.GestureConfig
 import eu.hxreborn.tfs.gesture.GestureInputMonitor
 import eu.hxreborn.tfs.gesture.ScreenshotTrigger
 import eu.hxreborn.tfs.gesture.ThreeFingerGestureHandler
+import eu.hxreborn.tfs.prefs.CaptureMode
+import eu.hxreborn.tfs.prefs.Prefs
+import eu.hxreborn.tfs.prefs.readOrDefault
 import eu.hxreborn.tfs.util.log
 import io.github.libxposed.api.XposedInterface.AfterHookCallback
 import io.github.libxposed.api.XposedInterface.Hooker
@@ -25,6 +29,8 @@ class PhoneWindowManagerHooker : Hooker {
         @JvmStatic
         @AfterInvocation
         fun after(callback: AfterHookCallback) {
+            // SystemReady can hit again
+            // Register once or duplicate listeners start stacking up
             if (!registered.compareAndSet(false, true)) return
 
             runCatching {
@@ -37,17 +43,32 @@ class PhoneWindowManagerHooker : Hooker {
         }
 
         private fun registerGestureListener(phoneWindowManager: Any) {
-            val bindings = PhoneWindowManagerBindings.resolve(phoneWindowManager)
+            val p = prefs
+            val captureMode = CaptureMode.fromKey(Prefs.CAPTURE_MODE.readOrDefault(p))
+            val config =
+                GestureConfig(
+                    swipeThresholdFraction = Prefs.SWIPE_THRESHOLD_PCT.readOrDefault(p) / 100f,
+                    edgeExclusionDp = Prefs.EDGE_EXCLUSION_DP.readOrDefault(p).toFloat(),
+                    fingerLandingWindowMs = Prefs.FINGER_LANDING_MS.readOrDefault(p).toLong(),
+                    cooldownMs = Prefs.COOLDOWN_MS.readOrDefault(p).toLong(),
+                )
+            val bindings = PhoneWindowManagerBindings.resolve(phoneWindowManager, captureMode)
+            // Build the monitor before wiring the listener
+            // Block the app from handling this gesture
             GestureInputMonitor.create()
             val gestureHandler =
                 ThreeFingerGestureHandler(
                     context = bindings.systemContext,
-                    prefs = prefs,
+                    prefs = p,
+                    config = config,
                     onSwipeDown = { ScreenshotTrigger.takeScreenshot(bindings.screenshotDispatch) },
                     onPilfer = { GestureInputMonitor.pilferPointers() },
                 )
             val proxy =
                 Proxy.newProxyInstance(
+                    // PointerEventListener is hidden and comes from system_server's classloader
+                    // Proxy avoids shipping a stub that can drift across releases
+                    // https://cs.android.com/android/platform/superproject/main/+/main:core/java/android/view/WindowManagerPolicyConstants.java
                     phoneWindowManager.javaClass.classLoader,
                     arrayOf(bindings.pointerListenerClass),
                     PointerEventListenerProxy(gestureHandler),

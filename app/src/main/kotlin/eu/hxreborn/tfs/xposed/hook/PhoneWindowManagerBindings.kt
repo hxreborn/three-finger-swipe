@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import eu.hxreborn.tfs.gesture.ScreenshotDispatch
 import eu.hxreborn.tfs.gesture.ScreenshotDispatchResolver
+import eu.hxreborn.tfs.prefs.CaptureMode
 import eu.hxreborn.tfs.util.findMethodUpward
 import eu.hxreborn.tfs.util.log
 import eu.hxreborn.tfs.util.logDebug
@@ -20,7 +21,10 @@ internal data class PhoneWindowManagerBindings(
         private const val POINTER_LISTENER_NAME =
             "android.view.WindowManagerPolicyConstants\$PointerEventListener"
 
-        fun resolve(phoneWindowManager: Any): PhoneWindowManagerBindings {
+        fun resolve(
+            phoneWindowManager: Any,
+            captureMode: CaptureMode = CaptureMode.REFLECTION,
+        ): PhoneWindowManagerBindings {
             val classLoader = phoneWindowManager.javaClass.classLoader
             val pointerListenerClass = Class.forName(POINTER_LISTENER_NAME, false, classLoader)
 
@@ -47,7 +51,7 @@ internal data class PhoneWindowManagerBindings(
                 pointerRegistration = pointerRegistration,
                 screenshotDispatch =
                     policyHandler?.let {
-                        ScreenshotDispatchResolver.resolve(phoneWindowManager, it)
+                        ScreenshotDispatchResolver.resolve(phoneWindowManager, it, captureMode)
                     },
             )
         }
@@ -55,6 +59,8 @@ internal data class PhoneWindowManagerBindings(
         private fun Any.resolvePointerRegistration(
             pointerListenerClass: Class<*>,
         ): PointerRegistration? {
+            // This moved across releases and OEM forks
+            // Check both paths so the hook does not care where it lives
             val displayContent =
                 readField("mDefaultDisplayPolicy")?.readField("mDisplayContent").also {
                     if (it == null) {
