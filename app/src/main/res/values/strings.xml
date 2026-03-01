@@ -3,9 +3,25 @@
   <string name="app_name">Three Finger Swipe</string>
   <string name="app_desc">Standalone implementation of three-finger swipe screenshots using the modern LSPosed API</string>
   <string name="category_screenshot_gesture">Screenshot gesture</string>
+  <string name="category_gesture_tuning">Gesture tuning</string>
   <string name="category_advanced">Advanced</string>
   <string name="pref_swipe_title">Three-finger swipe down</string>
   <string name="pref_swipe_summary">Take a screenshot</string>
+  <string name="pref_swipe_threshold_title">Swipe sensitivity</string>
+  <string name="pref_swipe_threshold_summary">Minimum downward distance to register a swipe, as a percent of the screen\'s shortest dimension. Lower values trigger more easily but increase false positives.</string>
+  <string name="pref_edge_exclusion_title">Edge exclusion</string>
+  <string name="pref_edge_exclusion_summary">Ignore touches starting within this distance from any screen edge. Prevents conflicts with system back gestures and navigation bars.</string>
+  <string name="pref_finger_landing_title">Finger landing window</string>
+  <string name="pref_finger_landing_summary">Maximum time between the first and last finger touching down to count as a simultaneous 3-finger tap. Increase if your fingers don\'t land at exactly the same time.</string>
+  <string name="pref_cooldown_title">Trigger cooldown</string>
+  <string name="pref_cooldown_summary">Minimum time between consecutive screenshots. Prevents accidental rapid-fire captures from a single long swipe.</string>
+  <string name="pref_capture_mode_title">Capture mode</string>
+  <string name="pref_capture_mode_reflection">Reflection (recommended)</string>
+  <string name="pref_capture_mode_reflection_desc">Reflection (recommended)\nCalls the system screenshot API directly via DisplayPolicy or ScreenshotHelper. Works on stock and Pixel ROMs.</string>
+  <string name="pref_capture_mode_sysrq">SYSRQ key injection</string>
+  <string name="pref_capture_mode_sysrq_desc">SYSRQ key injection\nSimulates a Print Screen key press. Use only if Reflection does nothing on your ROM. Apps can intercept this key.</string>
+  <string name="pref_reset_title">Reset to defaults</string>
+  <string name="pref_reset_summary">Restore all gesture settings to their original values</string>
   <string name="pref_debug_title">Debug logging</string>
   <string name="pref_debug_summary">Log gesture recognition details</string>
 </resources>
