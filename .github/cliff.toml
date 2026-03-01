@@ -1,0 +1,45 @@
+[changelog]
+header = "# Changelog\n\n"
+body = """
+{% for group, commits in commits | group_by(attribute="group") %}
+    ### {{ group | striptags | trim | upper_first }}
+    {% for commit in commits %}
+        - {{ commit.message | upper_first }}\
+          {% if commit.github.pr_number %} \
+            ([#{{ commit.github.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.github.pr_number }}))\
+          {% endif %}\
+          {% if commit.github.username %} by @{{ commit.github.username }}{% endif %}
+    {%- endfor %}
+{% endfor %}
+"""
+trim = true
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+split_commits = false
+protect_breaking_commits = false
+tag_pattern = "v[0-9]*"
+sort_commits = "newest"
+
+commit_parsers = [
+  { message = "^feat", group = "<!-- 00 -->Added" },
+  { message = "^fix", group = "<!-- 01 -->Fixed" },
+  { message = "^perf", group = "<!-- 02 -->Performance" },
+  { body = ".*Security", group = "<!-- 03 -->Security" },
+  { message = "^refactor", group = "<!-- 04 -->Changed" },
+  { message = "^revert", group = "<!-- 05 -->Reverted" },
+  { message = "^doc", skip = true },
+  { message = "^test", skip = true },
+  { message = "^build", skip = true },
+  { message = "^ci", skip = true },
+  { message = "^style", skip = true },
+  { message = "^chore\\(release\\)", skip = true },
+  { message = "^chore\\(deps\\)", skip = true },
+  { message = "^chore\\(changelog\\)", skip = true },
+  { message = "^chore", skip = true },
+]
+
+[remote.github]
+owner = "hxreborn"
+repo = "three-finger-swipe"

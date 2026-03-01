@@ -1,0 +1,69 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+labels: [ "bug" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Fill in as much as you can.
+
+  - type: input
+    id: module-version
+    attributes:
+      label: Module version
+      placeholder: "e.g. 1.2.0"
+    validations:
+      required: true
+
+  - type: input
+    id: android-version
+    attributes:
+      label: Android version
+      placeholder: "e.g. Android 15 (API 35)"
+    validations:
+      required: true
+
+  - type: input
+    id: rom
+    attributes:
+      label: ROM / Device
+      placeholder: "e.g. Pixel 9 Pro, stock / OnePlus 12, OxygenOS 15"
+    validations:
+      required: true
+
+  - type: input
+    id: lsposed-version
+    attributes:
+      label: LSPosed version
+      placeholder: "e.g. JingMatrix fork v1.11.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the bug. What did you expect to happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps to trigger the bug.
+      placeholder: |
+        1. Enable module in LSPosed
+        2. Open target app
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Paste relevant logcat output or LSPosed Manager logs. Use a code block.
+      render: shell
+    validations:
+      required: false
