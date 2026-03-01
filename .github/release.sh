@@ -41,6 +41,8 @@ echo "Tag: $TAG"
 FASTLANE_FILE="fastlane/metadata/android/en-US/changelogs/${VERSION_CODE}.txt"
 if [[ ! -f "$FASTLANE_FILE" ]]; then
   echo "Warning: fastlane changelog not found at $FASTLANE_FILE"
+  read -rp "Continue without fastlane changelog? [y/N] " REPLY
+  [[ "$REPLY" =~ ^[Yy]$ ]] || exit 1
 fi
 
 git cliff --tag "$TAG" --config .github/cliff.toml -o CHANGELOG.md
@@ -57,7 +59,7 @@ read -rp "Commit, tag, and push? [y/N] " REPLY
 
 git add -A
 git commit -m "chore: release v$VERSION"
-git tag -a "$TAG" -m "v$VERSION"
+git tag -s "$TAG" -m "v$VERSION"
 git push origin main "$TAG"
 # git push mirror main "$TAG"
 
