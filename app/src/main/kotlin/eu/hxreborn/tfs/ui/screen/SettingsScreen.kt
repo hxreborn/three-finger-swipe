@@ -2,12 +2,10 @@ package eu.hxreborn.tfs.ui.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Gesture
-import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
@@ -51,13 +48,11 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     val onSwipeEnabledChange = remember<(Boolean) -> Unit> { { viewModel.setSwipeEnabled(it) } }
-    val onLongPressEnabledChange = remember<(Boolean) -> Unit> { { viewModel.setLongPressEnabled(it) } }
     val onDebugLogsChange = remember<(Boolean) -> Unit> { { viewModel.setDebugLogs(it) } }
 
     SettingsContent(
         state = state,
         onSwipeEnabledChange = onSwipeEnabledChange,
-        onLongPressEnabledChange = onLongPressEnabledChange,
         onDebugLogsChange = onDebugLogsChange,
     )
 }
@@ -67,7 +62,6 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
 private fun SettingsContent(
     state: PrefsState,
     onSwipeEnabledChange: (Boolean) -> Unit,
-    onLongPressEnabledChange: (Boolean) -> Unit,
     onDebugLogsChange: (Boolean) -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -119,7 +113,7 @@ private fun SettingsContent(
                     title = { Text(stringResource(R.string.category_screenshot_gesture)) },
                 )
 
-                val gestureCount = 2
+                val gestureCount = 1
                 val swipeShape = shapeForPosition(gestureCount, 0)
                 switchPreference(
                     modifier = Modifier.preferenceCard(surface, swipeShape),
@@ -141,31 +135,6 @@ private fun SettingsContent(
                         Text(stringResource(R.string.pref_swipe_summary))
                     },
                     onValueChange = onSwipeEnabledChange,
-                )
-
-                item { Spacer(Modifier.height(2.dp)) }
-
-                val longPressShape = shapeForPosition(gestureCount, 1)
-                switchPreference(
-                    modifier = Modifier.preferenceCard(surface, longPressShape),
-                    key = Prefs.LONG_PRESS_ENABLED.key,
-                    value = state.longPressEnabled,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.TouchApp,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.pref_long_press_title),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(stringResource(R.string.pref_long_press_summary))
-                    },
-                    onValueChange = onLongPressEnabledChange,
                 )
 
                 preferenceCategory(

@@ -22,8 +22,6 @@ class SettingsViewModelImpl(
 
     override fun setSwipeEnabled(value: Boolean) = repository.save(Prefs.SWIPE_ENABLED, value)
 
-    override fun setLongPressEnabled(value: Boolean) = repository.save(Prefs.LONG_PRESS_ENABLED, value)
-
     override fun setDebugLogs(value: Boolean) = repository.save(Prefs.DEBUG_LOGS, value)
 }
 

@@ -9,7 +9,5 @@ abstract class SettingsViewModel : ViewModel() {
 
     abstract fun setSwipeEnabled(value: Boolean)
 
-    abstract fun setLongPressEnabled(value: Boolean)
-
     abstract fun setDebugLogs(value: Boolean)
 }
