@@ -15,6 +15,7 @@ import eu.hxreborn.tfs.util.log
 internal object GestureInputMonitor {
     private var inputMonitor: Any? = null
 
+    // prevent GC of BatchedInputEventReceiver, which would close the input channel
     @Suppress("unused")
     private var eventDrain: Any? = null
 

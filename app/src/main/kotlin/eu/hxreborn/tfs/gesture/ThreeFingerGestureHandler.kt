@@ -6,13 +6,14 @@ import android.graphics.PointF
 import android.os.SystemClock
 import android.view.InputDevice
 import android.view.MotionEvent
-import eu.hxreborn.tfs.prefs.PrefSpec
 import eu.hxreborn.tfs.prefs.Prefs
+import eu.hxreborn.tfs.prefs.readOrDefault
 import eu.hxreborn.tfs.util.log
 import eu.hxreborn.tfs.util.logDebug
 import kotlin.math.abs
 import kotlin.math.hypot
 
+// TODO: refactor
 class ThreeFingerGestureHandler(
     context: Context,
     private val prefs: SharedPreferences?,
@@ -22,6 +23,11 @@ class ThreeFingerGestureHandler(
 ) {
     private val displayMetrics = context.applicationContext.resources.displayMetrics
     private val edgeExclusionPx = config.edgeExclusionDp * displayMetrics.density
+    private val swipeThresholdPx =
+        minOf(
+            displayMetrics.widthPixels,
+            displayMetrics.heightPixels,
+        ) * config.swipeThresholdFraction
 
     private var state: GestureState = GestureState.Idle
 
@@ -29,7 +35,7 @@ class ThreeFingerGestureHandler(
 
     fun onPointerEvent(event: MotionEvent) {
         if (!event.isTouchscreen) return
-        if (!readPref(Prefs.SWIPE_ENABLED)) return
+        if (!Prefs.SWIPE_ENABLED.readOrDefault(prefs)) return
 
         state =
             when (event.actionMasked) {
@@ -114,28 +120,23 @@ class ThreeFingerGestureHandler(
         if (now - lastTriggerTime < config.cooldownMs) return null
 
         val currentPoints = event.points()
-        val swipeThreshold = computeSwipeThreshold()
-
         val isValidSwipe =
             tracking.startPoints.all { (pointerId, startPoint) ->
                 val currentPoint = currentPoints[pointerId] ?: return@all false
                 val deltaY = currentPoint.y - startPoint.y
                 val deltaX = currentPoint.x - startPoint.x
 
-                deltaY >= swipeThreshold && abs(deltaX) <= abs(deltaY)
+                deltaY >= swipeThresholdPx && abs(deltaX) <= abs(deltaY)
             }
 
         if (!isValidSwipe) return null
 
         val heldDuration = event.eventTime - tracking.startTimeMs
         lastTriggerTime = now
-        log("Swipe fired: held=${heldDuration}ms threshold=${swipeThreshold.toInt()}px")
+        log("Swipe fired: held=${heldDuration}ms threshold=${swipeThresholdPx.toInt()}px")
         onSwipeDown()
         return GestureState.Triggered
     }
-
-    private fun readPref(pref: PrefSpec<Boolean>): Boolean =
-        prefs?.let { pref.read(it) } ?: pref.default
 
     private fun Map<Int, PointF>.areGrouped(): Boolean =
         values.all { point ->
@@ -153,11 +154,6 @@ class ThreeFingerGestureHandler(
                 point.y < edgeExclusionPx ||
                 point.y > screenHeight - edgeExclusionPx
         }
-    }
-
-    private fun computeSwipeThreshold(): Float {
-        val smallestDimension = minOf(displayMetrics.widthPixels, displayMetrics.heightPixels)
-        return smallestDimension * config.swipeThresholdFraction
     }
 }
 
