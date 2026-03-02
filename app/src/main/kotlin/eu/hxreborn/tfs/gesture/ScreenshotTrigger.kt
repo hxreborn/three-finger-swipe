@@ -5,11 +5,9 @@ import eu.hxreborn.tfs.util.log
 
 class ScreenshotDispatch(
     val handler: Handler,
-    private val invocation: () -> Unit,
+    internal val invocation: () -> Unit,
     val description: String,
-) {
-    fun invoke() = invocation()
-}
+)
 
 object ScreenshotTrigger {
     fun takeScreenshot(dispatch: ScreenshotDispatch?) {
@@ -27,7 +25,7 @@ object ScreenshotTrigger {
         origin: String,
     ) {
         runCatching {
-            dispatch.invoke()
+            dispatch.invocation()
         }.onSuccess {
             log("Screenshot request sent [origin=$origin ${dispatch.description}]")
         }.onFailure {

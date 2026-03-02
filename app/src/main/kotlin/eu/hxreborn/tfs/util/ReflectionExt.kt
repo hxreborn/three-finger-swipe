@@ -35,7 +35,7 @@ fun Class<*>.methodAccessible(
 
 fun Any.readField(name: String): Any? = javaClass.findFieldUpward(name)?.get(this)
 
-fun Method.signature(): String =
+internal fun Method.signature(): String =
     buildString {
         append(declaringClass.name)
         append('#')
