@@ -9,7 +9,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import eu.hxreborn.tfs.App
 import eu.hxreborn.tfs.prefs.Prefs
 import eu.hxreborn.tfs.prefs.PrefsRepository
-import eu.hxreborn.tfs.ui.screen.SettingsScreen
+import eu.hxreborn.tfs.ui.navigation.AppNavHost
 import eu.hxreborn.tfs.ui.theme.AppTheme
 import eu.hxreborn.tfs.ui.viewmodel.SettingsViewModel
 import eu.hxreborn.tfs.ui.viewmodel.SettingsViewModelFactory
@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             AppTheme {
-                SettingsScreen(viewModel)
+                AppNavHost(viewModel)
             }
         }
     }

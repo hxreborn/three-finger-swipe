@@ -13,7 +13,6 @@ import eu.hxreborn.tfs.util.logDebug
 import kotlin.math.abs
 import kotlin.math.hypot
 
-// TODO: refactor
 class ThreeFingerGestureHandler(
     context: Context,
     private val prefs: SharedPreferences?,
@@ -22,12 +21,13 @@ class ThreeFingerGestureHandler(
     private val onPilfer: () -> Unit = {},
 ) {
     private val displayMetrics = context.applicationContext.resources.displayMetrics
-    private val edgeExclusionPx = config.edgeExclusionDp * displayMetrics.density
-    private val swipeThresholdPx =
-        minOf(
-            displayMetrics.widthPixels,
-            displayMetrics.heightPixels,
-        ) * config.swipeThresholdFraction
+    private val smallestDimension = minOf(displayMetrics.widthPixels, displayMetrics.heightPixels)
+
+    private val edgeExclusionPx: Float
+        get() = Prefs.EDGE_EXCLUSION_DP.readOrDefault(prefs) * displayMetrics.density
+
+    private val swipeThresholdPx: Float
+        get() = smallestDimension * Prefs.SWIPE_THRESHOLD_PCT.readOrDefault(prefs) / 100f
 
     private var state: GestureState = GestureState.Idle
 
@@ -63,20 +63,60 @@ class ThreeFingerGestureHandler(
 
         val points = event.points()
         val landingDuration = event.eventTime - event.downTime
+        val landingWindowMs = Prefs.FINGER_LANDING_MS.readOrDefault(prefs).toLong()
+        val exclusion = edgeExclusionPx
+
+        logDebug {
+            val positions =
+                points.entries.joinToString { (id, p) ->
+                    "#$id(${p.x.toInt()},${p.y.toInt()})"
+                }
+            "Gesture start: $positions landing=${landingDuration}ms " +
+                "edge=${exclusion.toInt()}px threshold=${swipeThresholdPx.toInt()}px " +
+                "cooldown=${Prefs.COOLDOWN_MS.readOrDefault(prefs)}ms"
+        }
 
         return when {
-            landingDuration > config.fingerLandingWindowMs -> {
-                logDebug { "Gesture rejected: fingers landed too slowly" }
+            isInCooldown() -> {
+                val cooldownMs = Prefs.COOLDOWN_MS.readOrDefault(prefs).toLong()
+                val remaining =
+                    (cooldownMs - (SystemClock.elapsedRealtime() - lastTriggerTime))
+                        .coerceAtLeast(0L)
+                logDebug {
+                    "Rejected: cooldown active ${remaining}ms remaining of ${cooldownMs}ms"
+                }
+                GestureState.Idle
+            }
+
+            landingDuration > landingWindowMs -> {
+                logDebug {
+                    "Rejected: landing ${landingDuration}ms > window ${landingWindowMs}ms"
+                }
                 GestureState.Idle
             }
 
             !points.areGrouped() -> {
-                logDebug { "Gesture rejected: fingers started too far apart" }
+                logDebug {
+                    val spread = points.values.maxSpread()
+                    "Rejected: spread ${spread.toInt()}px > " +
+                        "proximity ${config.startingProximityPx.toInt()}px"
+                }
                 GestureState.Idle
             }
 
             points.startsNearEdge() -> {
-                logDebug { "Gesture rejected: fingers started near screen edge" }
+                logDebug {
+                    val w = displayMetrics.widthPixels
+                    val h = displayMetrics.heightPixels
+                    val offending =
+                        points.entries
+                            .filter { (_, p) ->
+                                p.x < exclusion || p.x > w - exclusion ||
+                                    p.y < exclusion || p.y > h - exclusion
+                            }.joinToString { (id, p) -> "#$id(${p.x.toInt()},${p.y.toInt()})" }
+                    "Rejected: near edge $offending " +
+                        "exclusion=${exclusion.toInt()}px screen=${w}x$h"
+                }
                 GestureState.Idle
             }
 
@@ -117,25 +157,39 @@ class ThreeFingerGestureHandler(
         event: MotionEvent,
     ): GestureState.Triggered? {
         val now = SystemClock.elapsedRealtime()
-        if (now - lastTriggerTime < config.cooldownMs) return null
+        if (isInCooldown(now)) return null
 
         val currentPoints = event.points()
+        val threshold = swipeThresholdPx
         val isValidSwipe =
             tracking.startPoints.all { (pointerId, startPoint) ->
                 val currentPoint = currentPoints[pointerId] ?: return@all false
                 val deltaY = currentPoint.y - startPoint.y
                 val deltaX = currentPoint.x - startPoint.x
 
-                deltaY >= swipeThresholdPx && abs(deltaX) <= abs(deltaY)
+                deltaY >= threshold && abs(deltaX) <= abs(deltaY)
             }
 
         if (!isValidSwipe) return null
 
         val heldDuration = event.eventTime - tracking.startTimeMs
         lastTriggerTime = now
-        log("Swipe fired: held=${heldDuration}ms threshold=${swipeThresholdPx.toInt()}px")
+        log("Swipe fired: held=${heldDuration}ms threshold=${threshold.toInt()}px")
+        logDebug {
+            tracking.startPoints.entries.joinToString(" ") { (id, start) ->
+                val cur = currentPoints[id]
+                val dy = cur?.let { it.y - start.y }?.toInt() ?: 0
+                val dx = cur?.let { it.x - start.x }?.toInt() ?: 0
+                "#$id(dy=$dy dx=$dx)"
+            }
+        }
         onSwipeDown()
         return GestureState.Triggered
+    }
+
+    private fun isInCooldown(now: Long = SystemClock.elapsedRealtime()): Boolean {
+        val cooldownMs = Prefs.COOLDOWN_MS.readOrDefault(prefs).toLong()
+        return now - lastTriggerTime < cooldownMs
     }
 
     private fun Map<Int, PointF>.areGrouped(): Boolean =
@@ -168,3 +222,6 @@ private val MotionEvent.isTouchscreen: Boolean
     get() = source and InputDevice.SOURCE_TOUCHSCREEN == InputDevice.SOURCE_TOUCHSCREEN
 
 private fun PointF.distanceTo(other: PointF): Float = hypot(x - other.x, y - other.y)
+
+private fun Collection<PointF>.maxSpread(): Float =
+    flatMap { a -> map { b -> a.distanceTo(b) } }.maxOrNull() ?: 0f
