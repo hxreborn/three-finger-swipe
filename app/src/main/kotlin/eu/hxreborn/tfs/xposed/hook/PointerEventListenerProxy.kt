@@ -1,13 +1,13 @@
 package eu.hxreborn.tfs.xposed.hook
 
 import android.view.MotionEvent
-import eu.hxreborn.tfs.gesture.ThreeFingerSwipeHandler
+import eu.hxreborn.tfs.gesture.GestureHandler
 import eu.hxreborn.tfs.util.log
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 
 internal class PointerEventListenerProxy(
-    private val gestureHandler: ThreeFingerSwipeHandler,
+    private val gestureHandler: GestureHandler,
 ) : InvocationHandler {
     override fun invoke(
         proxy: Any?,

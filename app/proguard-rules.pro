@@ -24,7 +24,7 @@
 }
 
 # Gesture handler invoked via Proxy
--keep class eu.hxreborn.tfs.gesture.ThreeFingerGestureHandler { *; }
+-keep class eu.hxreborn.tfs.gesture.GestureHandler { *; }
 
 # Xposed detection method
 -keep class eu.hxreborn.tfs.ui.MainActivity {

@@ -14,7 +14,7 @@ import eu.hxreborn.tfs.util.logDebug
 import kotlin.math.abs
 import kotlin.math.hypot
 
-class ThreeFingerSwipeHandler(
+class GestureHandler(
     context: Context,
     private val prefs: SharedPreferences?,
     private val config: GestureConfig = GestureConfig(),

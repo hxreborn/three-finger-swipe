@@ -5,7 +5,7 @@ import eu.hxreborn.tfs.action.ActionId
 import eu.hxreborn.tfs.action.ActionRegistry
 import eu.hxreborn.tfs.gesture.GestureConfig
 import eu.hxreborn.tfs.gesture.GestureInputMonitor
-import eu.hxreborn.tfs.gesture.ThreeFingerSwipeHandler
+import eu.hxreborn.tfs.gesture.GestureHandler
 import eu.hxreborn.tfs.prefs.CaptureMode
 import eu.hxreborn.tfs.prefs.Prefs
 import eu.hxreborn.tfs.prefs.readOrDefault
@@ -60,7 +60,7 @@ class PhoneWindowManagerHooker : Hooker {
             // Block the app from handling this gesture
             GestureInputMonitor.create()
             val gestureHandler =
-                ThreeFingerSwipeHandler(
+                GestureHandler(
                     context = bindings.systemContext,
                     prefs = p,
                     config = config,
