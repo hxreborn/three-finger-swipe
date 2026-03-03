@@ -15,9 +15,6 @@ dependencyResolutionManagement {
             content { includeGroup("io.github.libxposed") }
         }
     }
-    versionCatalogs {
-        create("libs")
-    }
 }
 
 rootProject.name = "ThreeFingerSwipe"

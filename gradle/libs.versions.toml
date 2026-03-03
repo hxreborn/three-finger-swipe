@@ -19,6 +19,12 @@ material3 = "1.5.0-alpha15"
 lottie = "6.7.1"
 composePreferences = "2.1.1"
 
+# Navigation
+navigation3 = "1.0.1"
+
+# Serialization
+kotlinxSerialization = "1.8.1"
+
 # Code quality
 ktlint = "14.0.1"
 
@@ -44,6 +50,13 @@ lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-com
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 
+# Navigation
+navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
+navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+
+# Serialization
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerialization" }
+
 # UI
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie" }
 compose-preferences = { group = "me.zhanghai.compose.preference", name = "preference", version.ref = "composePreferences" }
@@ -62,4 +75,5 @@ compose-debug = ["compose-ui-tooling", "compose-ui-test-manifest"]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
