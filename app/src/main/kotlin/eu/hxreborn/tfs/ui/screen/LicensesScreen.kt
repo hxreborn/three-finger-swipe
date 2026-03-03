@@ -9,6 +9,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -30,7 +31,17 @@ fun LicensesScreen(onBack: () -> Unit) {
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
-                title = { Text(stringResource(R.string.about_licenses)) },
+                title = {
+                    Text(
+                        stringResource(R.string.about_licenses),
+                        style =
+                            if (scrollBehavior.state.collapsedFraction < 0.5f) {
+                                MaterialTheme.typography.headlineLarge
+                            } else {
+                                MaterialTheme.typography.titleLarge
+                            },
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(

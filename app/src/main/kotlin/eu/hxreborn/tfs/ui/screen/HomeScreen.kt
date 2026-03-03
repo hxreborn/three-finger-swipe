@@ -61,10 +61,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import eu.hxreborn.tfs.BuildConfig
 import eu.hxreborn.tfs.R
@@ -74,6 +74,7 @@ import eu.hxreborn.tfs.prefs.Prefs
 import eu.hxreborn.tfs.prefs.PrefsState
 import eu.hxreborn.tfs.ui.component.GestureIllustration
 import eu.hxreborn.tfs.ui.navigation.Destination
+import eu.hxreborn.tfs.ui.theme.AppTheme
 import eu.hxreborn.tfs.ui.util.shapeForPosition
 import kotlinx.coroutines.launch
 import me.zhanghai.compose.preference.Preference
@@ -124,7 +125,12 @@ fun HomeScreen(
                     Text(
                         text = stringResource(R.string.app_name),
                         maxLines = 2,
-                        style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.SemiBold),
+                        style =
+                            if (scrollBehavior.state.collapsedFraction < 0.5f) {
+                                MaterialTheme.typography.headlineLarge
+                            } else {
+                                MaterialTheme.typography.titleLarge
+                            },
                     )
                 },
                 scrollBehavior = scrollBehavior,
@@ -185,7 +191,7 @@ fun HomeScreen(
                     summary = {
                         Text(
                             when (state.captureMode) {
-                                CaptureMode.REFLECTION -> {
+                                CaptureMode.SYSTEM_API -> {
                                     stringResource(R.string.pref_capture_mode_reflection)
                                 }
 
@@ -531,3 +537,21 @@ private fun ActionId.labelRes(): Int =
         ActionId.QS_PANEL -> R.string.action_qs_panel
         ActionId.RINGER_MODE -> R.string.action_ringer_mode
     }
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenPreview() {
+    AppTheme(useDynamicColor = false) {
+        HomeScreen(
+            state = PrefsState(),
+            pendingReboot = false,
+            onActionChange = {},
+            onFingerLandingChange = {},
+            onCooldownChange = {},
+            onDebugLogsChange = {},
+            onResetToDefaults = {},
+            onRestoreState = {},
+            onNavigate = {},
+        )
+    }
+}
