@@ -164,14 +164,14 @@ fun HomeScreen(
 
                 preferenceCategory(
                     key = "category_gestures",
-                    title = { Text(stringResource(R.string.category_screenshot_gesture)) },
+                    title = { Text(stringResource(R.string.category_swipe_down_action)) },
                 )
 
                 navigablePreference(
                     modifier = Modifier.preferenceCard(surface, shapeForPosition(1, 0)),
                     key = "action_picker",
                     icon = { Icon(Icons.Outlined.Gesture, contentDescription = null) },
-                    title = { Text(stringResource(R.string.pref_action_title)) },
+                    title = { Text(stringResource(R.string.pref_swipe_down_action_title)) },
                     summary = { Text(stringResource(state.selectedAction.labelRes())) },
                     onClick = { showActionDialog = true },
                 )
@@ -482,7 +482,7 @@ private fun ActionPickerDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.pref_action_title)) },
+        title = { Text(stringResource(R.string.pref_swipe_down_action_title)) },
         text = {
             Column(
                 Modifier

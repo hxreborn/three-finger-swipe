@@ -20,7 +20,7 @@ standalone implementation of three-finger swipe screenshots using the modern LSP
 ## Features
 
 - Three-finger swipe down to take a screenshot (or trigger other actions)
-- Single-purpose module with one hook on `system_server`
+- Single-purpose module with one hook on System Framework
 - Compatible with [CaptureSposed](https://github.com/99keshav99/CaptureSposed) and [DisableFlagSecure](https://github.com/Xposed-Modules-Repo/io.github.lsposed.disableflagsecure)
 - Settings UI built with Jetpack Compose and Material 3 Expressive
 - Built on LSPosed API 100
