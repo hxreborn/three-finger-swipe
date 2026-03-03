@@ -31,10 +31,12 @@ class MainActivity : ComponentActivity() {
         object : XposedServiceHelper.OnServiceListener {
             override fun onServiceBind(service: XposedService) {
                 repository.attachRemotePrefs(service.getRemotePreferences(Prefs.GROUP))
+                viewModel.setXposedActive(true)
             }
 
             override fun onServiceDied(service: XposedService) {
                 repository.attachRemotePrefs(null)
+                viewModel.setXposedActive(false)
             }
         }
 
@@ -57,8 +59,4 @@ class MainActivity : ComponentActivity() {
         App.removeServiceListener(serviceListener)
     }
 
-    companion object {
-        @JvmStatic
-        fun isXposedEnabled(): Boolean = false
-    }
 }

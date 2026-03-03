@@ -31,6 +31,7 @@ fun AppNavHost(viewModel: SettingsViewModel) {
     val backStack = rememberNavBackStack(Destination.Home)
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val pendingReboot by viewModel.pendingReboot.collectAsStateWithLifecycle()
+    val xposedActive by viewModel.xposedActive.collectAsStateWithLifecycle()
     val activity = LocalContext.current.findActivity()
     val density = LocalDensity.current
     val slideDistance = with(density) { 30.dp.roundToPx() }
@@ -112,6 +113,7 @@ fun AppNavHost(viewModel: SettingsViewModel) {
 
                 entry<Destination.About> {
                     AboutScreen(
+                        xposedActive = xposedActive,
                         onNavigateToLicenses = {
                             backStack.add(Destination.Licenses)
                         },

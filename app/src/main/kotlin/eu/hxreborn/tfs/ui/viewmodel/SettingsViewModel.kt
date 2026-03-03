@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.StateFlow
 abstract class SettingsViewModel : ViewModel() {
     abstract val uiState: StateFlow<PrefsState>
     abstract val pendingReboot: StateFlow<Boolean>
+    abstract val xposedActive: StateFlow<Boolean>
+
+    abstract fun setXposedActive(active: Boolean)
 
     abstract fun <T : Any> savePref(
         pref: PrefSpec<T>,

@@ -25,6 +25,13 @@ class SettingsViewModelImpl(
     private val _pendingReboot = MutableStateFlow(false)
     override val pendingReboot: StateFlow<Boolean> = _pendingReboot.asStateFlow()
 
+    private val _xposedActive = MutableStateFlow(false)
+    override val xposedActive: StateFlow<Boolean> = _xposedActive.asStateFlow()
+
+    override fun setXposedActive(active: Boolean) {
+        _xposedActive.value = active
+    }
+
     override fun <T : Any> savePref(
         pref: PrefSpec<T>,
         value: T,

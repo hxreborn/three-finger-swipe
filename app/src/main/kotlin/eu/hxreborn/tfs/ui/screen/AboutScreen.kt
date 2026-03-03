@@ -38,17 +38,16 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import eu.hxreborn.tfs.BuildConfig
 import eu.hxreborn.tfs.R
-import eu.hxreborn.tfs.ui.MainActivity
 import eu.hxreborn.tfs.ui.theme.AppTheme
 import eu.hxreborn.tfs.ui.util.shapeForPosition
 
 @Composable
 fun AboutScreen(
+    xposedActive: Boolean,
     onNavigateToLicenses: () -> Unit,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
-    val xposedActive = MainActivity.isXposedEnabled()
     val versionSubtitle =
         "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})" +
             " \u00b7 ${BuildConfig.BUILD_TYPE} \u00b7 ${BuildConfig.GIT_HASH}"
@@ -221,6 +220,7 @@ private fun AboutCard(
 private fun AboutScreenPreview() {
     AppTheme(useDynamicColor = false) {
         AboutScreen(
+            xposedActive = false,
             onNavigateToLicenses = {},
             onBack = {},
         )
