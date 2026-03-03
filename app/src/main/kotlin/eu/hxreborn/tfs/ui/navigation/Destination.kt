@@ -15,4 +15,10 @@ sealed interface Destination : NavKey {
 
     @Serializable
     data object CaptureMode : Destination
+
+    @Serializable
+    data object About : Destination
+
+    @Serializable
+    data object Licenses : Destination
 }

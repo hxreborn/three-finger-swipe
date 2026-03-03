@@ -18,9 +18,11 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import eu.hxreborn.tfs.prefs.Prefs
+import eu.hxreborn.tfs.ui.screen.AboutScreen
 import eu.hxreborn.tfs.ui.screen.CaptureModeScreen
 import eu.hxreborn.tfs.ui.screen.EdgeExclusionScreen
 import eu.hxreborn.tfs.ui.screen.HomeScreen
+import eu.hxreborn.tfs.ui.screen.LicensesScreen
 import eu.hxreborn.tfs.ui.screen.TriggerDistanceScreen
 import eu.hxreborn.tfs.ui.viewmodel.SettingsViewModel
 
@@ -106,6 +108,19 @@ fun AppNavHost(viewModel: SettingsViewModel) {
                         },
                         onBack = navigateUp,
                     )
+                }
+
+                entry<Destination.About> {
+                    AboutScreen(
+                        onNavigateToLicenses = {
+                            backStack.add(Destination.Licenses)
+                        },
+                        onBack = navigateUp,
+                    )
+                }
+
+                entry<Destination.Licenses> {
+                    LicensesScreen(onBack = navigateUp)
                 }
             },
     )

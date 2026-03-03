@@ -24,6 +24,7 @@ import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Gesture
 import androidx.compose.material.icons.outlined.HourglassEmpty
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.RestartAlt
 import androidx.compose.material.icons.outlined.SwipeDown
 import androidx.compose.material.icons.outlined.Timer
@@ -54,6 +55,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import eu.hxreborn.tfs.BuildConfig
 import eu.hxreborn.tfs.R
 import eu.hxreborn.tfs.prefs.CaptureMode
 import eu.hxreborn.tfs.prefs.Prefs
@@ -277,6 +279,22 @@ fun HomeScreen(
                             }
                         }
                     },
+                )
+
+                // About
+
+                preferenceCategory(
+                    key = "category_about",
+                    title = { Text(stringResource(R.string.category_about)) },
+                )
+
+                navigablePreference(
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(1, 0)),
+                    key = "nav_about",
+                    icon = { Icon(Icons.Outlined.Info, contentDescription = null) },
+                    title = { Text(stringResource(R.string.category_about)) },
+                    summary = { Text("v${BuildConfig.VERSION_NAME}") },
+                    onClick = { onNavigate(Destination.About) },
                 )
             }
         }
