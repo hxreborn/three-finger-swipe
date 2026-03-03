@@ -157,7 +157,7 @@ fun HomeScreen(
                 navigablePreference(
                     modifier = Modifier.preferenceCard(surface, shapeForPosition(1, 0)),
                     key = "action_picker",
-                    icon = { Icon(Icons.Outlined.Bolt, contentDescription = null) },
+                    icon = { Icon(Icons.Outlined.Gesture, contentDescription = null) },
                     title = { Text(stringResource(R.string.pref_action_title)) },
                     summary = { Text(stringResource(state.selectedAction.labelRes())) },
                     onClick = { showActionDialog = true },
