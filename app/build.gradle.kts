@@ -23,15 +23,17 @@ android {
         versionCode = project.findProperty("version.code")?.toString()?.toInt() ?: 10001
         versionName = project.findProperty("version.name")?.toString() ?: "1.0.0"
 
-        buildConfigField(
-            "String",
-            "GIT_HASH",
-            "\"${
-                providers.exec {
-                    commandLine("git", "rev-parse", "--short", "HEAD")
-                }.standardOutput.asText.get().trim()
-            }\"",
-        )
+        val gitHash: String =
+            runCatching {
+                providers
+                    .exec {
+                        commandLine("git", "rev-parse", "--short", "HEAD")
+                    }.standardOutput.asText
+                    .get()
+                    .trim()
+            }.getOrDefault("")
+
+        buildConfigField("String", "GIT_HASH", "\"$gitHash\"")
     }
 
     signingConfigs {

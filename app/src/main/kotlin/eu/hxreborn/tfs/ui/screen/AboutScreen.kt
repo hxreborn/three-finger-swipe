@@ -18,7 +18,6 @@ import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.Gavel
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -41,6 +40,8 @@ import eu.hxreborn.tfs.R
 import eu.hxreborn.tfs.ui.theme.AppTheme
 import eu.hxreborn.tfs.ui.util.shapeForPosition
 
+private const val SEPARATOR = " \u00b7 "
+
 @Composable
 fun AboutScreen(
     xposedActive: Boolean,
@@ -48,9 +49,13 @@ fun AboutScreen(
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
+    val sourceBuild = stringResource(R.string.about_source_build)
     val versionSubtitle =
-        "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})" +
-            " \u00b7 ${BuildConfig.BUILD_TYPE} \u00b7 ${BuildConfig.GIT_HASH}"
+        listOf(
+            "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+            BuildConfig.BUILD_TYPE,
+            BuildConfig.GIT_HASH.takeIf { it.isNotBlank() } ?: sourceBuild,
+        ).joinToString(SEPARATOR)
 
     SettingsDetailScaffold(
         title = stringResource(R.string.category_about),
@@ -104,7 +109,7 @@ fun AboutScreen(
                 } else {
                     stringResource(R.string.about_module_inactive)
                 },
-            shape = shapeForPosition(5, 0),
+            shape = shapeForPosition(4, 0),
         )
 
         Spacer(Modifier.height(2.dp))
@@ -113,7 +118,7 @@ fun AboutScreen(
             icon = Icons.Outlined.Code,
             title = stringResource(R.string.about_source_code),
             subtitle = stringResource(R.string.about_source_code_summary),
-            shape = shapeForPosition(5, 1),
+            shape = shapeForPosition(4, 1),
             onClick = {
                 context.startActivity(
                     Intent(
@@ -130,7 +135,7 @@ fun AboutScreen(
             icon = Icons.Outlined.Gavel,
             title = stringResource(R.string.about_licenses),
             subtitle = stringResource(R.string.about_licenses_summary),
-            shape = shapeForPosition(5, 2),
+            shape = shapeForPosition(4, 2),
             onClick = onNavigateToLicenses,
         )
 
@@ -140,29 +145,12 @@ fun AboutScreen(
             icon = Icons.Outlined.BugReport,
             title = stringResource(R.string.about_report_issue),
             subtitle = stringResource(R.string.about_report_issue_summary),
-            shape = shapeForPosition(5, 3),
+            shape = shapeForPosition(4, 3),
             onClick = {
                 context.startActivity(
                     Intent(
                         Intent.ACTION_VIEW,
                         "https://github.com/hxreborn/three-finger-swipe/issues".toUri(),
-                    ),
-                )
-            },
-        )
-
-        Spacer(Modifier.height(2.dp))
-
-        AboutCard(
-            icon = Icons.Outlined.Person,
-            title = stringResource(R.string.about_made_by),
-            subtitle = stringResource(R.string.about_made_by_value),
-            shape = shapeForPosition(5, 4),
-            onClick = {
-                context.startActivity(
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        "https://github.com/hxreborn".toUri(),
                     ),
                 )
             },
@@ -199,20 +187,13 @@ private fun AboutCard(
             }
         }
     }
-    if (onClick != null) {
-        Surface(
-            onClick = onClick,
-            modifier = Modifier.fillMaxWidth(),
-            shape = shape,
-            color = MaterialTheme.colorScheme.surfaceVariant,
-        ) { rowContent() }
-    } else {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = shape,
-            color = MaterialTheme.colorScheme.surfaceVariant,
-        ) { rowContent() }
-    }
+    Surface(
+        onClick = onClick ?: {},
+        enabled = onClick != null,
+        modifier = Modifier.fillMaxWidth(),
+        shape = shape,
+        color = MaterialTheme.colorScheme.surfaceVariant,
+    ) { rowContent() }
 }
 
 @Preview(showBackground = true)

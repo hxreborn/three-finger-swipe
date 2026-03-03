@@ -192,11 +192,11 @@ fun HomeScreen(
                         Text(
                             when (state.captureMode) {
                                 CaptureMode.SYSTEM_API -> {
-                                    stringResource(R.string.pref_capture_mode_reflection)
+                                    stringResource(R.string.pref_capture_mode_reflection_title)
                                 }
 
                                 CaptureMode.SYSRQ -> {
-                                    stringResource(R.string.pref_capture_mode_sysrq)
+                                    stringResource(R.string.pref_capture_mode_sysrq_title)
                                 }
                             },
                         )
