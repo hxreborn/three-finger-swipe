@@ -16,10 +16,10 @@
   <string name="pref_cooldown_title">Trigger cooldown</string>
   <string name="pref_cooldown_summary">Minimum time between consecutive screenshots. Prevents accidental rapid-fire captures from a single long swipe.</string>
   <string name="pref_capture_mode_title">Capture mode</string>
-  <string name="pref_capture_mode_reflection">Reflection (recommended)</string>
-  <string name="pref_capture_mode_reflection_desc">Reflection (recommended)\nCalls the system screenshot API directly via DisplayPolicy or ScreenshotHelper. Works on stock and Pixel ROMs.</string>
+  <string name="pref_capture_mode_reflection">System API (recommended)</string>
+  <string name="pref_capture_mode_reflection_desc">System API (recommended)\nUses the platform\'s own screenshot entry point (DisplayPolicy.takeScreenshot). Works on stock and Pixel ROMs.</string>
   <string name="pref_capture_mode_sysrq">SYSRQ key injection</string>
-  <string name="pref_capture_mode_sysrq_desc">SYSRQ key injection\nSimulates a Print Screen key press. Use only if Reflection does nothing on your ROM. Apps can intercept this key.</string>
+  <string name="pref_capture_mode_sysrq_desc">SYSRQ key injection\nSimulates a Print Screen key press. Use only if the System API mode does nothing on your ROM. Apps can intercept this key.</string>
   <string name="pref_reset_title">Reset to defaults</string>
   <string name="pref_reset_summary">Restores all gesture parameters, timings, and capture modes to their original factory values</string>
   <string name="pref_debug_title">Debug logging</string>
@@ -34,10 +34,10 @@
   <string name="value_percent_dp">%1$d%% (≈ %2$d dp)</string>
   <string name="value_dp">%1$d dp</string>
   <string name="value_ms">%1$d ms</string>
-  <string name="pref_capture_mode_reflection_title">Reflection (recommended)</string>
-  <string name="pref_capture_mode_reflection_body">Invokes the native system screenshot API directly. Leave this selected for stock Android and Pixel-based ROMs.</string>
+  <string name="pref_capture_mode_reflection_title">System API (recommended)</string>
+  <string name="pref_capture_mode_reflection_body">Uses the platform\'s own screenshot path (DisplayPolicy.takeScreenshot), the same call the system makes for hardware button screenshots. Leave this selected for stock Android and Pixel-based ROMs.</string>
   <string name="pref_capture_mode_sysrq_title">SYSRQ key injection</string>
-  <string name="pref_capture_mode_sysrq_body">Injects a Print Screen key event. Use this only if Reflection does not work on your ROM. Some full-screen apps and games may consume the event before the system handles it.</string>
+  <string name="pref_capture_mode_sysrq_body">Injects a Print Screen key event. Use this only if the System API mode does not work on your ROM. Some full-screen apps and games may consume the event before the system handles it.</string>
   <string name="reboot_fab_label">Reboot to apply</string>
   <string name="value_approx_px">≈ %1$d px</string>
   <string name="value_approx_dp">≈ %1$d dp</string>
