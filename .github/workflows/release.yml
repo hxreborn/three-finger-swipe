@@ -48,20 +48,20 @@ jobs:
 
       - name: Generate changelog
         id: cliff
-        continue-on-error: true
         uses: orhun/git-cliff-action@v4
         with:
           config: .github/cliff.toml
           args: --latest --strip header
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPO: ${{ github.repository }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           prerelease: ${{ steps.version.outputs.prerelease }}
           files: app/build/outputs/apk/**/*.apk
-          body: ${{ steps.cliff.outputs.content || '' }}
+          body: ${{ steps.cliff.outputs.content || format('Release {0}', github.ref_name) }}
           draft: false
 
       - name: Cleanup keystore
