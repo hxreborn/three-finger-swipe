@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.SystemClock
 import android.view.InputDevice
+import android.view.InputEvent
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import eu.hxreborn.tfs.prefs.CaptureMode
@@ -64,7 +65,7 @@ internal object ScreenshotDispatchResolver {
         val method =
             inputManager.javaClass.findMethodUpward(
                 "injectInputEvent",
-                android.view.InputEvent::class.java,
+                InputEvent::class.java,
                 Int::class.javaPrimitiveType!!,
             ) ?: run {
                 log("ScreenshotDispatchResolver: injectInputEvent not found for SYSRQ path")
