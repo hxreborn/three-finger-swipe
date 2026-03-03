@@ -59,8 +59,7 @@ internal data class PhoneWindowManagerBindings(
         private fun Any.resolvePointerRegistration(
             pointerListenerClass: Class<*>,
         ): PointerRegistration? {
-            // This moved across releases and OEM forks
-            // Check both paths so the hook does not care where it lives
+            // Try DisplayContent first, fall back to WindowManagerFuncs
             val displayContent =
                 readField("mDefaultDisplayPolicy")?.readField("mDisplayContent").also {
                     if (it == null) {

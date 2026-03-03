@@ -30,8 +30,7 @@ class PhoneWindowManagerHooker : Hooker {
         @JvmStatic
         @AfterInvocation
         fun after(callback: AfterHookCallback) {
-            // SystemReady can hit again
-            // Register once or duplicate listeners start stacking up
+            // Register once because systemReady can fire again and stack duplicate listeners
             if (!registered.compareAndSet(false, true)) return
 
             runCatching {
@@ -56,8 +55,7 @@ class PhoneWindowManagerHooker : Hooker {
             val bindings = PhoneWindowManagerBindings.resolve(phoneWindowManager, captureMode)
             val actionId = ActionId.fromKey(Prefs.SELECTED_ACTION.readOrDefault(p))
             val action = ActionRegistry.build(actionId, bindings.screenshotDispatch)
-            // Build the monitor before wiring the listener
-            // Block the app from handling this gesture
+            // Pilfering blocks the app from receiving touch events during the gesture
             GestureInputMonitor.create()
             val gestureHandler =
                 GestureHandler(
