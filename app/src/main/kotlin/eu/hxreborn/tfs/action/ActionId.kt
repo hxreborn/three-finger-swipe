@@ -3,6 +3,7 @@ package eu.hxreborn.tfs.action
 enum class ActionId(
     val key: String,
 ) {
+    NO_ACTION("no_action"),
     SCREENSHOT("screenshot"),
     RECENT_APPS("recent_apps"),
     SEARCH_ASSISTANT("search_assistant"),

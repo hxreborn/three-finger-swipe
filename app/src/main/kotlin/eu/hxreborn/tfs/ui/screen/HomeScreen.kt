@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.BorderOuter
@@ -29,21 +31,25 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.RestartAlt
 import androidx.compose.material.icons.outlined.SwipeDown
 import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -55,6 +61,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import eu.hxreborn.tfs.BuildConfig
 import eu.hxreborn.tfs.R
@@ -78,7 +85,7 @@ import kotlin.math.roundToInt
 fun HomeScreen(
     state: PrefsState,
     pendingReboot: Boolean,
-    onSwipeEnabledChange: (Boolean) -> Unit,
+    onActionChange: (ActionId) -> Unit,
     onFingerLandingChange: (Int) -> Unit,
     onCooldownChange: (Int) -> Unit,
     onDebugLogsChange: (Boolean) -> Unit,
@@ -91,6 +98,18 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val resetDone = stringResource(R.string.snackbar_reset_done)
     val undoLabel = stringResource(R.string.snackbar_undo)
+    var showActionDialog by remember { mutableStateOf(false) }
+
+    if (showActionDialog) {
+        ActionPickerDialog(
+            selectedAction = state.selectedAction,
+            onActionChange = {
+                onActionChange(it)
+                showActionDialog = false
+            },
+            onDismiss = { showActionDialog = false },
+        )
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -133,19 +152,13 @@ fun HomeScreen(
                     title = { Text(stringResource(R.string.category_screenshot_gesture)) },
                 )
 
-                switchPreference(
+                navigablePreference(
                     modifier = Modifier.preferenceCard(surface, shapeForPosition(1, 0)),
-                    key = Prefs.SWIPE_ENABLED.key,
-                    value = state.swipeEnabled,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.Gesture,
-                            contentDescription = null,
-                        )
-                    },
-                    title = { Text(stringResource(R.string.pref_swipe_title)) },
-                    summary = { Text(stringResource(R.string.pref_swipe_summary)) },
-                    onValueChange = onSwipeEnabledChange,
+                    key = "action_picker",
+                    icon = { Icon(Icons.Outlined.Bolt, contentDescription = null) },
+                    title = { Text(stringResource(R.string.pref_action_title)) },
+                    summary = { Text(stringResource(state.selectedAction.labelRes())) },
+                    onClick = { showActionDialog = true },
                 )
 
                 // Settings (navigable rows)
@@ -156,18 +169,7 @@ fun HomeScreen(
                 )
 
                 navigablePreference(
-                    modifier = Modifier.preferenceCard(surface, shapeForPosition(4, 0)),
-                    key = "nav_action",
-                    icon = { Icon(Icons.Outlined.Bolt, contentDescription = null) },
-                    title = { Text(stringResource(R.string.pref_action_title)) },
-                    summary = { Text(stringResource(state.selectedAction.labelRes())) },
-                    onClick = { onNavigate(Destination.ActionPicker) },
-                )
-
-                preferenceSpacer("spacer_action")
-
-                navigablePreference(
-                    modifier = Modifier.preferenceCard(surface, shapeForPosition(4, 1)),
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(3, 0)),
                     key = "nav_capture_mode",
                     icon = { Icon(Icons.Outlined.CameraAlt, contentDescription = null) },
                     title = { Text(stringResource(R.string.screen_capture_mode)) },
@@ -190,7 +192,7 @@ fun HomeScreen(
                 preferenceSpacer("spacer_capture")
 
                 navigablePreference(
-                    modifier = Modifier.preferenceCard(surface, shapeForPosition(4, 2)),
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(3, 1)),
                     key = "nav_trigger_distance",
                     icon = { Icon(Icons.Outlined.SwipeDown, contentDescription = null) },
                     title = { Text(stringResource(R.string.screen_trigger_distance)) },
@@ -203,7 +205,7 @@ fun HomeScreen(
                 preferenceSpacer("spacer_sensitivity")
 
                 navigablePreference(
-                    modifier = Modifier.preferenceCard(surface, shapeForPosition(4, 3)),
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(3, 2)),
                     key = "nav_edge_exclusion",
                     icon = { Icon(Icons.Outlined.BorderOuter, contentDescription = null) },
                     title = { Text(stringResource(R.string.screen_edge_exclusion)) },
@@ -456,3 +458,63 @@ private fun snap(
     if (interval <= 1) return raw
     return ((raw + interval / 2) / interval) * interval
 }
+
+@Composable
+private fun ActionPickerDialog(
+    selectedAction: ActionId,
+    onActionChange: (ActionId) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.pref_action_title)) },
+        text = {
+            Column(Modifier.selectableGroup()) {
+                ActionId.entries.forEach { action ->
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = selectedAction == action,
+                                    onClick = { onActionChange(action) },
+                                    role = Role.RadioButton,
+                                ).padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(selected = selectedAction == action, onClick = null)
+                        Spacer(Modifier.width(12.dp))
+                        Text(stringResource(action.labelRes()))
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(android.R.string.cancel))
+            }
+        },
+    )
+}
+
+@androidx.annotation.StringRes
+private fun ActionId.labelRes(): Int =
+    when (this) {
+        ActionId.NO_ACTION -> R.string.action_no_action
+        ActionId.SCREENSHOT -> R.string.action_screenshot
+        ActionId.RECENT_APPS -> R.string.action_recent_apps
+        ActionId.SEARCH_ASSISTANT -> R.string.action_search_assistant
+        ActionId.VOICE_SEARCH -> R.string.action_voice_search
+        ActionId.LAUNCH_CAMERA -> R.string.action_launch_camera
+        ActionId.SCREEN_OFF -> R.string.action_screen_off
+        ActionId.LAST_APP -> R.string.action_last_app
+        ActionId.KILL_APP -> R.string.action_kill_app
+        ActionId.MEDIA_PLAY_PAUSE -> R.string.action_media_play_pause
+        ActionId.TOGGLE_TORCH -> R.string.action_toggle_torch
+        ActionId.VOLUME_PANEL -> R.string.action_volume_panel
+        ActionId.CLEAR_NOTIFICATIONS -> R.string.action_clear_notifications
+        ActionId.NOTIFICATION_PANEL -> R.string.action_notification_panel
+        ActionId.QS_PANEL -> R.string.action_qs_panel
+        ActionId.RINGER_MODE -> R.string.action_ringer_mode
+    }

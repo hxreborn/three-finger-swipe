@@ -17,9 +17,6 @@ sealed interface Destination : NavKey {
     data object CaptureMode : Destination
 
     @Serializable
-    data object ActionPicker : Destination
-
-    @Serializable
     data object About : Destination
 
     @Serializable

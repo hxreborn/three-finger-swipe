@@ -60,6 +60,7 @@
   <string name="about_made_by_value">hxreborn</string>
   <string name="screen_action_picker">Action</string>
   <string name="pref_action_title">Action</string>
+  <string name="action_no_action">No action</string>
   <string name="action_screenshot">Take screenshot</string>
   <string name="action_recent_apps">Recent apps switcher</string>
   <string name="action_search_assistant">Search assistant</string>

@@ -11,6 +11,7 @@ object ActionRegistry {
         dispatch: ScreenshotDispatch?,
     ): Action =
         when (id) {
+            ActionId.NO_ACTION -> Action {}
             ActionId.SCREENSHOT -> ScreenshotAction(dispatch)
             else -> StubAction(id)
         }

@@ -19,7 +19,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import eu.hxreborn.tfs.prefs.Prefs
 import eu.hxreborn.tfs.ui.screen.AboutScreen
-import eu.hxreborn.tfs.ui.screen.ActionPickerScreen
 import eu.hxreborn.tfs.ui.screen.CaptureModeScreen
 import eu.hxreborn.tfs.ui.screen.EdgeExclusionScreen
 import eu.hxreborn.tfs.ui.screen.HomeScreen
@@ -72,7 +71,7 @@ fun AppNavHost(viewModel: SettingsViewModel) {
                     HomeScreen(
                         state = state,
                         pendingReboot = pendingReboot,
-                        onSwipeEnabledChange = { viewModel.savePref(Prefs.SWIPE_ENABLED, it) },
+                        onActionChange = { viewModel.savePref(Prefs.SELECTED_ACTION, it.key) },
                         onFingerLandingChange = {
                             viewModel.savePref(Prefs.FINGER_LANDING_MS, it)
                         },
@@ -98,14 +97,6 @@ fun AppNavHost(viewModel: SettingsViewModel) {
                         onValueChange = {
                             viewModel.savePref(Prefs.SWIPE_THRESHOLD_PCT, it)
                         },
-                        onBack = navigateUp,
-                    )
-                }
-
-                entry<Destination.ActionPicker> {
-                    ActionPickerScreen(
-                        selectedAction = state.selectedAction,
-                        onActionChange = { viewModel.savePref(Prefs.SELECTED_ACTION, it.key) },
                         onBack = navigateUp,
                     )
                 }
