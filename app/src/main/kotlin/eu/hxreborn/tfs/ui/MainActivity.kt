@@ -58,5 +58,4 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         App.removeServiceListener(serviceListener)
     }
-
 }

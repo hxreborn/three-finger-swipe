@@ -13,11 +13,11 @@ import eu.hxreborn.tfs.util.logDebug
 import kotlin.math.abs
 import kotlin.math.hypot
 
-class ThreeFingerGestureHandler(
+class ThreeFingerSwipeHandler(
     context: Context,
     private val prefs: SharedPreferences?,
     private val config: GestureConfig = GestureConfig(),
-    private val onSwipeDown: () -> Unit,
+    private val onTrigger: () -> Unit,
     private val onPilfer: () -> Unit = {},
 ) {
     private val displayMetrics = context.applicationContext.resources.displayMetrics
@@ -183,7 +183,7 @@ class ThreeFingerGestureHandler(
                 "#$id(dy=$dy dx=$dx)"
             }
         }
-        onSwipeDown()
+        onTrigger()
         return GestureState.Triggered
     }
 

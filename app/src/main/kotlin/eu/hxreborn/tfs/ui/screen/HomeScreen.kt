@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.BorderOuter
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.CameraAlt
@@ -57,6 +58,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eu.hxreborn.tfs.BuildConfig
 import eu.hxreborn.tfs.R
+import eu.hxreborn.tfs.action.ActionId
 import eu.hxreborn.tfs.prefs.CaptureMode
 import eu.hxreborn.tfs.prefs.Prefs
 import eu.hxreborn.tfs.prefs.PrefsState
@@ -154,7 +156,18 @@ fun HomeScreen(
                 )
 
                 navigablePreference(
-                    modifier = Modifier.preferenceCard(surface, shapeForPosition(3, 0)),
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(4, 0)),
+                    key = "nav_action",
+                    icon = { Icon(Icons.Outlined.Bolt, contentDescription = null) },
+                    title = { Text(stringResource(R.string.pref_action_title)) },
+                    summary = { Text(stringResource(state.selectedAction.labelRes())) },
+                    onClick = { onNavigate(Destination.ActionPicker) },
+                )
+
+                preferenceSpacer("spacer_action")
+
+                navigablePreference(
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(4, 1)),
                     key = "nav_capture_mode",
                     icon = { Icon(Icons.Outlined.CameraAlt, contentDescription = null) },
                     title = { Text(stringResource(R.string.screen_capture_mode)) },
@@ -177,7 +190,7 @@ fun HomeScreen(
                 preferenceSpacer("spacer_capture")
 
                 navigablePreference(
-                    modifier = Modifier.preferenceCard(surface, shapeForPosition(3, 1)),
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(4, 2)),
                     key = "nav_trigger_distance",
                     icon = { Icon(Icons.Outlined.SwipeDown, contentDescription = null) },
                     title = { Text(stringResource(R.string.screen_trigger_distance)) },
@@ -190,7 +203,7 @@ fun HomeScreen(
                 preferenceSpacer("spacer_sensitivity")
 
                 navigablePreference(
-                    modifier = Modifier.preferenceCard(surface, shapeForPosition(3, 2)),
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(4, 3)),
                     key = "nav_edge_exclusion",
                     icon = { Icon(Icons.Outlined.BorderOuter, contentDescription = null) },
                     title = { Text(stringResource(R.string.screen_edge_exclusion)) },
@@ -259,7 +272,7 @@ fun HomeScreen(
 
                 preferenceSpacer("spacer_debug")
 
-                preference(
+                navigablePreference(
                     modifier = Modifier.preferenceCard(surface, shapeForPosition(2, 1)),
                     key = "reset_to_defaults",
                     icon = { Icon(Icons.Outlined.RestartAlt, contentDescription = null) },
@@ -387,27 +400,6 @@ private fun LazyListScope.timingPreference(
 // Navigable preference row with a trailing chevron icon
 
 private fun LazyListScope.navigablePreference(
-    key: String,
-    title: @Composable () -> Unit,
-    modifier: Modifier = Modifier.fillMaxWidth(),
-    icon: @Composable (() -> Unit)? = null,
-    summary: @Composable (() -> Unit)? = null,
-    onClick: () -> Unit,
-) {
-    item(key = key, contentType = "Preference") {
-        Preference(
-            title = { title() },
-            modifier = modifier,
-            icon = icon,
-            summary = summary,
-            onClick = onClick,
-        )
-    }
-}
-
-// Plain tappable preference item
-
-private fun LazyListScope.preference(
     key: String,
     title: @Composable () -> Unit,
     modifier: Modifier = Modifier.fillMaxWidth(),

@@ -2,8 +2,8 @@ package eu.hxreborn.tfs.xposed.hook
 
 import android.content.Context
 import android.os.Handler
-import eu.hxreborn.tfs.gesture.ScreenshotDispatch
-import eu.hxreborn.tfs.gesture.ScreenshotDispatchResolver
+import eu.hxreborn.tfs.action.screenshot.ScreenshotActionResolver
+import eu.hxreborn.tfs.action.screenshot.ScreenshotDispatch
 import eu.hxreborn.tfs.prefs.CaptureMode
 import eu.hxreborn.tfs.util.findMethodUpward
 import eu.hxreborn.tfs.util.log
@@ -51,7 +51,7 @@ internal data class PhoneWindowManagerBindings(
                 pointerRegistration = pointerRegistration,
                 screenshotDispatch =
                     policyHandler?.let {
-                        ScreenshotDispatchResolver.resolve(phoneWindowManager, it, captureMode)
+                        ScreenshotActionResolver.resolve(phoneWindowManager, it, captureMode)
                     },
             )
         }

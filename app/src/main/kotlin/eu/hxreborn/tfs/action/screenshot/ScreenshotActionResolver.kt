@@ -1,4 +1,4 @@
-package eu.hxreborn.tfs.gesture
+package eu.hxreborn.tfs.action.screenshot
 
 import android.content.Context
 import android.os.Handler
@@ -21,7 +21,13 @@ private const val SCREENSHOT_VENDOR_GESTURE = 6
 private const val INJECT_INPUT_EVENT_MODE_ASYNC = 0
 private const val MAX_DISPLAY_POLICY_ARGS = 4
 
-internal object ScreenshotDispatchResolver {
+class ScreenshotDispatch(
+    val handler: Handler,
+    internal val invocation: () -> Unit,
+    val description: String,
+)
+
+internal object ScreenshotActionResolver {
     fun resolve(
         phoneWindowManager: Any,
         handler: Handler,
@@ -47,7 +53,7 @@ internal object ScreenshotDispatchResolver {
             }
         if (dispatch == null) {
             log(
-                "ScreenshotDispatchResolver: no screenshot method found — screenshot unavailable",
+                "ScreenshotActionResolver: no screenshot method found — screenshot unavailable",
             )
         }
         return dispatch
@@ -68,12 +74,12 @@ internal object ScreenshotDispatchResolver {
                 InputEvent::class.java,
                 Int::class.javaPrimitiveType!!,
             ) ?: run {
-                log("ScreenshotDispatchResolver: injectInputEvent not found for SYSRQ path")
+                log("ScreenshotActionResolver: injectInputEvent not found for SYSRQ path")
                 return null
             }
 
         val summary = "SYSRQ ${method.signature()} mode=$INJECT_INPUT_EVENT_MODE_ASYNC"
-        log("ScreenshotDispatchResolver: resolved $summary")
+        log("ScreenshotActionResolver: resolved $summary")
 
         return ScreenshotDispatch(
             handler = handler,
@@ -137,7 +143,7 @@ internal object ScreenshotDispatchResolver {
                 return dispatchDisplayPolicy(target, m, handler, "scan")
             }
 
-        log("ScreenshotDispatchResolver: takeScreenshot not found on DisplayPolicy")
+        log("ScreenshotActionResolver: takeScreenshot not found on DisplayPolicy")
         return null
     }
 
@@ -150,7 +156,7 @@ internal object ScreenshotDispatchResolver {
         val defaults = intArrayOf(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_VENDOR_GESTURE, 0, 0)
         val args = defaults.take(method.parameterCount).map { it as Any }.toTypedArray()
         val summary = "DisplayPolicy[$origin] ${method.signature()}"
-        log("ScreenshotDispatchResolver: resolved $summary")
+        log("ScreenshotActionResolver: resolved $summary")
         return ScreenshotDispatch(
             handler = handler,
             invocation = { method.invoke(target, *args) },
@@ -201,7 +207,7 @@ internal object ScreenshotDispatchResolver {
                 ) ?: return null
 
             val summary = "ScreenshotHelper ${method.signature()}"
-            log("ScreenshotDispatchResolver: resolved $summary")
+            log("ScreenshotActionResolver: resolved $summary")
 
             ScreenshotDispatch(
                 handler = handler,
@@ -209,7 +215,7 @@ internal object ScreenshotDispatchResolver {
                 description = summary,
             )
         }.onFailure {
-            log("ScreenshotDispatchResolver: ScreenshotHelper resolution failed", it)
+            log("ScreenshotActionResolver: ScreenshotHelper resolution failed", it)
         }.getOrNull()
 }
 

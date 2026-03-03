@@ -1,10 +1,11 @@
 package eu.hxreborn.tfs.xposed.hook
 
 import android.content.SharedPreferences
+import eu.hxreborn.tfs.action.ActionId
+import eu.hxreborn.tfs.action.ActionRegistry
 import eu.hxreborn.tfs.gesture.GestureConfig
 import eu.hxreborn.tfs.gesture.GestureInputMonitor
-import eu.hxreborn.tfs.gesture.ScreenshotTrigger
-import eu.hxreborn.tfs.gesture.ThreeFingerGestureHandler
+import eu.hxreborn.tfs.gesture.ThreeFingerSwipeHandler
 import eu.hxreborn.tfs.prefs.CaptureMode
 import eu.hxreborn.tfs.prefs.Prefs
 import eu.hxreborn.tfs.prefs.readOrDefault
@@ -53,15 +54,17 @@ class PhoneWindowManagerHooker : Hooker {
                     cooldownMs = Prefs.COOLDOWN_MS.readOrDefault(p).toLong(),
                 )
             val bindings = PhoneWindowManagerBindings.resolve(phoneWindowManager, captureMode)
+            val actionId = ActionId.fromKey(Prefs.SELECTED_ACTION.readOrDefault(p))
+            val action = ActionRegistry.build(actionId, bindings.screenshotDispatch)
             // Build the monitor before wiring the listener
             // Block the app from handling this gesture
             GestureInputMonitor.create()
             val gestureHandler =
-                ThreeFingerGestureHandler(
+                ThreeFingerSwipeHandler(
                     context = bindings.systemContext,
                     prefs = p,
                     config = config,
-                    onSwipeDown = { ScreenshotTrigger.takeScreenshot(bindings.screenshotDispatch) },
+                    onTrigger = action::execute,
                     onPilfer = { GestureInputMonitor.pilferPointers() },
                 )
             val proxy =

@@ -58,4 +58,21 @@
   <string name="about_report_issue_summary">Report a bug or suggest a feature on GitHub</string>
   <string name="about_made_by">Made by</string>
   <string name="about_made_by_value">hxreborn</string>
+  <string name="screen_action_picker">Action</string>
+  <string name="pref_action_title">Action</string>
+  <string name="action_screenshot">Take screenshot</string>
+  <string name="action_recent_apps">Recent apps switcher</string>
+  <string name="action_search_assistant">Search assistant</string>
+  <string name="action_voice_search">Voice search</string>
+  <string name="action_launch_camera">Launch camera</string>
+  <string name="action_screen_off">Turn screen off</string>
+  <string name="action_last_app">Last app</string>
+  <string name="action_kill_app">Kill app</string>
+  <string name="action_media_play_pause">Play / pause music</string>
+  <string name="action_toggle_torch">Toggle torch</string>
+  <string name="action_volume_panel">Toggle volume panel</string>
+  <string name="action_clear_notifications">Clear all notifications</string>
+  <string name="action_notification_panel">Toggle notifications panel</string>
+  <string name="action_qs_panel">Expand QS panel</string>
+  <string name="action_ringer_mode">Change ringer mode</string>
 </resources>

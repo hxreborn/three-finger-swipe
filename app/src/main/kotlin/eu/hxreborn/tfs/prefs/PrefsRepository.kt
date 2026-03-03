@@ -2,6 +2,7 @@ package eu.hxreborn.tfs.prefs
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import eu.hxreborn.tfs.action.ActionId
 import eu.hxreborn.tfs.util.log
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -55,6 +56,7 @@ class PrefsRepository(
             Prefs.FINGER_LANDING_MS.write(this, state.fingerLandingMs)
             Prefs.COOLDOWN_MS.write(this, state.cooldownMs)
             Prefs.CAPTURE_MODE.write(this, state.captureMode.key)
+            Prefs.SELECTED_ACTION.write(this, state.selectedAction.key)
         }
         pushToRemote {
             Prefs.SWIPE_ENABLED.write(this, state.swipeEnabled)
@@ -64,6 +66,7 @@ class PrefsRepository(
             Prefs.FINGER_LANDING_MS.write(this, state.fingerLandingMs)
             Prefs.COOLDOWN_MS.write(this, state.cooldownMs)
             Prefs.CAPTURE_MODE.write(this, state.captureMode.key)
+            Prefs.SELECTED_ACTION.write(this, state.selectedAction.key)
         }
     }
 
@@ -94,6 +97,7 @@ class PrefsRepository(
             fingerLandingMs = Prefs.FINGER_LANDING_MS.read(localPrefs),
             cooldownMs = Prefs.COOLDOWN_MS.read(localPrefs),
             captureMode = CaptureMode.fromKey(Prefs.CAPTURE_MODE.read(localPrefs)),
+            selectedAction = ActionId.fromKey(Prefs.SELECTED_ACTION.read(localPrefs)),
         )
 }
 
@@ -105,4 +109,5 @@ data class PrefsState(
     val fingerLandingMs: Int = Prefs.FINGER_LANDING_MS.default,
     val cooldownMs: Int = Prefs.COOLDOWN_MS.default,
     val captureMode: CaptureMode = CaptureMode.REFLECTION,
+    val selectedAction: ActionId = ActionId.SCREENSHOT,
 )

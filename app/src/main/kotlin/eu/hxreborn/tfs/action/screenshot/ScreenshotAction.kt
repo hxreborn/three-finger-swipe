@@ -1,16 +1,12 @@
-package eu.hxreborn.tfs.gesture
+package eu.hxreborn.tfs.action.screenshot
 
-import android.os.Handler
+import eu.hxreborn.tfs.action.Action
 import eu.hxreborn.tfs.util.log
 
-class ScreenshotDispatch(
-    val handler: Handler,
-    internal val invocation: () -> Unit,
-    val description: String,
-)
-
-object ScreenshotTrigger {
-    fun takeScreenshot(dispatch: ScreenshotDispatch?) {
+class ScreenshotAction(
+    private val dispatch: ScreenshotDispatch?,
+) : Action {
+    override fun execute() {
         dispatch?.dispatchOrFallback() ?: log("No screenshot dispatch path is available")
     }
 

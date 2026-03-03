@@ -19,6 +19,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import eu.hxreborn.tfs.prefs.Prefs
 import eu.hxreborn.tfs.ui.screen.AboutScreen
+import eu.hxreborn.tfs.ui.screen.ActionPickerScreen
 import eu.hxreborn.tfs.ui.screen.CaptureModeScreen
 import eu.hxreborn.tfs.ui.screen.EdgeExclusionScreen
 import eu.hxreborn.tfs.ui.screen.HomeScreen
@@ -97,6 +98,14 @@ fun AppNavHost(viewModel: SettingsViewModel) {
                         onValueChange = {
                             viewModel.savePref(Prefs.SWIPE_THRESHOLD_PCT, it)
                         },
+                        onBack = navigateUp,
+                    )
+                }
+
+                entry<Destination.ActionPicker> {
+                    ActionPickerScreen(
+                        selectedAction = state.selectedAction,
+                        onActionChange = { viewModel.savePref(Prefs.SELECTED_ACTION, it.key) },
                         onBack = navigateUp,
                     )
                 }
