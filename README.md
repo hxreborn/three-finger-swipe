@@ -1,6 +1,6 @@
 # Three Finger Swipe
 
-standalone implementation of three-finger swipe screenshots using the modern LSPosed API
+Standalone implementation of three-finger swipe screenshots using the modern LSPosed API
 <p align="center">
   <a href="https://developer.android.com"><img src="https://img.shields.io/badge/Android-9%E2%80%9316-3DDC84?style=flat&logo=android&logoColor=white" alt="Android 9-16" /></a>
   <a href="https://github.com/LSPosed/LSPosed"><img src="https://img.shields.io/badge/LSPosed_API-100-8F00FF?style=flat" alt="LSPosed API 100" /></a>
@@ -14,7 +14,7 @@ standalone implementation of three-finger swipe screenshots using the modern LSP
   <a href="https://github.com/hxreborn/three-finger-swipe/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/hxreborn/three-finger-swipe/build.yml?label=build&style=flat&logo=githubactions&logoColor=white" alt="Build" /></a>
   <a href="https://github.com/hxreborn/three-finger-swipe/releases/latest"><img src="https://img.shields.io/github/v/release/hxreborn/three-finger-swipe?style=flat&logo=github" alt="Release" /></a>
   <a href="https://github.com/hxreborn/three-finger-swipe/releases"><img src="https://img.shields.io/github/downloads/hxreborn/three-finger-swipe/total?style=flat&logo=github" alt="Downloads" /></a>
-  <a href="https://github.com/hxreborn/three-finger-swipe/blob/main/LICENSE"><img src="https://img.shields.io/github/license/hxreborn/three-finger-swipe?style=flat&logo=gnu" alt="License" /></a>
+  <a href="https://github.com/hxreborn/three-finger-swipe/blob/main/LICENSE"><img src="https://img.shields.io/github/license/hxreborn/three-finger-swipe?style=flat" alt="License" /></a>
 </p>
 
 ## Features
