@@ -6,15 +6,15 @@ Standalone implementation of three-finger swipe screenshots using the modern LSP
   <a href="https://github.com/LSPosed/LSPosed"><img src="https://img.shields.io/badge/LSPosed_API-100-8F00FF?style=flat" alt="LSPosed API 100" /></a>
   <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Kotlin-2.3.10-7F52FF?style=flat&logo=kotlin&logoColor=white" alt="Kotlin" /></a>
   <a href="https://developer.android.com/compose"><img src="https://img.shields.io/badge/Compose-Material_3_Expressive-4285F4?style=flat&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose" /></a>
-  <a href="https://gradle.org"><img src="https://img.shields.io/badge/Gradle-8.12-02303A?style=flat&logo=gradle&logoColor=white" alt="Gradle" /></a>
-  <a href="https://developer.android.com/build"><img src="https://img.shields.io/badge/AGP-8.10-02303A?style=flat&logo=android&logoColor=white" alt="AGP" /></a>
+  <a href="https://gradle.org"><img src="https://img.shields.io/badge/Gradle-9.4.0-02303A?style=flat&logo=gradle&logoColor=white" alt="Gradle" /></a>
+  <a href="https://developer.android.com/build"><img src="https://img.shields.io/badge/AGP-9.1.0-02303A?style=flat&logo=android&logoColor=white" alt="AGP" /></a>
 </p>
 
 <p align="center">
   <a href="https://github.com/hxreborn/three-finger-swipe/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/hxreborn/three-finger-swipe/build.yml?label=build&style=flat&logo=githubactions&logoColor=white" alt="Build" /></a>
   <a href="https://github.com/hxreborn/three-finger-swipe/releases/latest"><img src="https://img.shields.io/github/v/release/hxreborn/three-finger-swipe?style=flat&logo=github" alt="Release" /></a>
   <a href="https://github.com/hxreborn/three-finger-swipe/releases"><img src="https://img.shields.io/github/downloads/hxreborn/three-finger-swipe/total?style=flat&logo=github" alt="Downloads" /></a>
-  <a href="https://github.com/hxreborn/three-finger-swipe/blob/main/LICENSE"><img src="https://img.shields.io/github/license/hxreborn/three-finger-swipe?style=flat" alt="License" /></a>
+  <a href="https://github.com/hxreborn/three-finger-swipe/blob/main/LICENSE"><img src="https://img.shields.io/github/license/hxreborn/three-finger-swipe?style=flat&logo=gnu" alt="License" /></a>
 </p>
 
 ## Features

@@ -19,6 +19,16 @@ tasks.register<Exec>("buildLibxposedApi") {
 
 tasks.register<Exec>("buildLibxposedService") {
     workingDir = file("libxposed/service")
+    // TODO: remove once https://github.com/libxposed/api/pull/51 is merged
+    val interfaceBuild = file("libxposed/service/interface/build.gradle.kts")
+    doFirst {
+        interfaceBuild.writeText(
+            interfaceBuild.readText().replace(
+                """namespace = "io.github.libxposed.service"""",
+                """namespace = "io.github.libxposed.iface"""",
+            ),
+        )
+    }
     commandLine(
         "./gradlew",
         ":interface:publishInterfacePublicationToMavenLocal",
