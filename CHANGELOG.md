@@ -3,13 +3,14 @@
 
 ### Added
 
-- Initial scaffold for more features
-- Add About screen with Material You header and Licenses screen
-- Replace single settings screen with multi-screen navigation
-- Add step snapping and state restore support
-- Add gesture tuning and capture mode settings
-- Add gesture tuning and capture mode pref specs
-- Add CaptureMode enum
+- Implement screen off, flashlight, and ringer mode actions
+- Initial scaffold for more features by @hxreborn
+- Add About screen with Material You header and Licenses screen by @hxreborn
+- Replace single settings screen with multi-screen navigation by @hxreborn
+- Add step snapping and state restore support by @hxreborn
+- Add gesture tuning and capture mode settings by @hxreborn
+- Add gesture tuning and capture mode pref specs by @hxreborn
+- Add CaptureMode enum by @hxreborn
 - Add app icons and splash animation by @hxreborn
 - Add settings screen and companion app by @hxreborn
 - Add Material 3 Expressive theme by @hxreborn
@@ -21,30 +22,37 @@
 
 ### Fixed
 
-- Simplify aboutLibraries release variant task
-- Make action picker dialog scrollable
-- Replace swipe toggle with inline action picker dialog
-- Derive module status from XposedService binding
+- Drop custom collect task, use plugin-registered exportLibraryDefinitions by @hxreborn
+- Simplify aboutLibraries release variant task by @hxreborn
+- Make action picker dialog scrollable by @hxreborn
+- Replace swipe toggle with inline action picker dialog by @hxreborn
+- Derive module status from XposedService binding by @hxreborn
 
 ### Changed
 
-- Remove SWIPE_ENABLED, use NO_ACTION to disable gesture
-- Trim screenshot dispatch helpers
-- Enrich SYSRQ dispatch logs
-- Replace per-pref setters with generic savePref
-- Integrate CaptureMode and GestureConfig into hook chain
-- Cache swipe threshold and use readOrDefault
-- Simplify screenshot dispatch with multi-path resolution
-- Add findAllMethodsUpward and Method.signature helpers
-- Expand PrefsState and extract pushToRemote
-- Add IntPref range validation and readOrDefault extension
-- Simplify gesture illustration
-- Remove crop settings
-- Remove crop prefs
-- Drop crop gateway binding
-- Clean up gesture handler
-- Simplify screenshot trigger
-- Simplify dispatch resolver
-- Remove display capture gateway
-- Remove screenshot delivery
-- Remove crop capture core
+- Remove stub actions and unused action IDs
+- Source GestureConfig defaults from Prefs
+- Align generic action naming
+- Rename CaptureMode.REFLECTION to SYSTEM_API
+- Replace null checks with idiomatic Kotlin scope functions
+- Rename ThreeFingerSwipeHandler to GestureHandler by @hxreborn
+- Remove SWIPE_ENABLED, use NO_ACTION to disable gesture by @hxreborn
+- Trim screenshot dispatch helpers by @hxreborn
+- Enrich SYSRQ dispatch logs by @hxreborn
+- Replace per-pref setters with generic savePref by @hxreborn
+- Integrate CaptureMode and GestureConfig into hook chain by @hxreborn
+- Cache swipe threshold and use readOrDefault by @hxreborn
+- Simplify screenshot dispatch with multi-path resolution by @hxreborn
+- Add findAllMethodsUpward and Method.signature helpers by @hxreborn
+- Expand PrefsState and extract pushToRemote by @hxreborn
+- Add IntPref range validation and readOrDefault extension by @hxreborn
+- Simplify gesture illustration by @hxreborn
+- Remove crop settings by @hxreborn
+- Remove crop prefs by @hxreborn
+- Drop crop gateway binding by @hxreborn
+- Clean up gesture handler by @hxreborn
+- Simplify screenshot trigger by @hxreborn
+- Simplify dispatch resolver by @hxreborn
+- Remove display capture gateway by @hxreborn
+- Remove screenshot delivery by @hxreborn
+- Remove crop capture core by @hxreborn
