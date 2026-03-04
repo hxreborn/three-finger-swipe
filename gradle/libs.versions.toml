@@ -11,7 +11,7 @@ libxposedService = "100-1.0.0"
 # AndroidX
 activityCompose = "1.12.4"
 lifecycleRuntimeKtx = "2.10.0"
-coreKtx = "1.16.0"
+coreKtx = "1.17.0"
 coreSplashscreen = "1.2.0"
 
 # UI
