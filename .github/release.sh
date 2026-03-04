@@ -32,7 +32,12 @@ TAG="v$VERSION"
 MAJOR=$(echo "$VERSION" | cut -d. -f1)
 MINOR=$(echo "$VERSION" | cut -d. -f2)
 PATCH=$(echo "$VERSION" | cut -d. -f3 | cut -d- -f1)
-VERSION_CODE=$(( MAJOR * 1000000 + MINOR * 1000 + PATCH ))
+if [[ "$VERSION" =~ -[a-zA-Z]+([0-9]+)$ ]]; then
+  PRE_NUM="${BASH_REMATCH[1]}"
+else
+  PRE_NUM=9
+fi
+VERSION_CODE=$(( MAJOR * 10000 + MINOR * 100 + PATCH * 10 + PRE_NUM ))
 
 echo "Version: $VERSION"
 echo "Version code: $VERSION_CODE"
