@@ -1,0 +1,5 @@
+First public beta. Three-finger swipe-down triggers configurable actions on Pixel and AOSP ROMs.
+
+- Screenshot, recent apps, torch, screen off, media controls, and more
+- Adjustable trigger distance, edge exclusion, and cooldown
+- System API and SYSRQ fallback capture modes
