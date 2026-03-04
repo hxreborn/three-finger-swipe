@@ -1,8 +1,8 @@
 [versions]
 # Core
 kotlin = "2.3.10"
-agp = "8.10.0"
-composeBom = "2026.01.01"
+agp = "9.1.0"
+composeBom = "2026.02.01"
 
 # libxposed
 libxposedApi = "100"
@@ -11,7 +11,7 @@ libxposedService = "100-1.0.0"
 # AndroidX
 activityCompose = "1.12.4"
 lifecycleRuntimeKtx = "2.10.0"
-coreKtx = "1.16.0"
+coreKtx = "1.17.0"
 coreSplashscreen = "1.2.0"
 
 # UI
@@ -26,7 +26,7 @@ navigation3 = "1.0.1"
 kotlinxSerialization = "1.8.1"
 
 # About
-aboutlibrariesPlugin = "11.6.3"
+aboutlibrariesPlugin = "13.2.1"
 aboutlibrariesRuntime = "13.2.1"
 
 # Code quality
@@ -81,7 +81,6 @@ compose-debug = ["compose-ui-tooling", "compose-ui-test-manifest"]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibrariesPlugin" }
