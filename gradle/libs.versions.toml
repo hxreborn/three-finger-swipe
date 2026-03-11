@@ -30,7 +30,7 @@ aboutlibrariesPlugin = "13.2.1"
 aboutlibrariesRuntime = "13.2.1"
 
 # Code quality
-ktlint = "14.0.1"
+ktlint = "14.1.0"
 
 [libraries]
 # libxposed
