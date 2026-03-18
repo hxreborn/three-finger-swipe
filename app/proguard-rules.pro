@@ -1,26 +1,12 @@
-# Module entry point
--keep class eu.hxreborn.tfs.xposed.ThreeFingerSwipeModule { *; }
-
-# All hooker classes
--keep @io.github.libxposed.api.annotations.XposedHooker class * { *; }
-
-# Keep annotations
--keep class io.github.libxposed.api.annotations.** { *; }
--keepattributes *Annotation*
--keepattributes RuntimeVisibleAnnotations
-
-# Hook methods
--keepclassmembers class * {
-    @io.github.libxposed.api.annotations.BeforeInvocation <methods>;
-    @io.github.libxposed.api.annotations.AfterInvocation <methods>;
-}
-
-# Xposed module class pattern
+# Xposed module (API 101)
 -adaptresourcefilecontents META-INF/xposed/java_init.list
+-keepattributes RuntimeVisibleAnnotations
 -keep,allowobfuscation,allowoptimization public class * extends io.github.libxposed.api.XposedModule {
-    public <init>(...);
+    public <init>();
+    public void onModuleLoaded(...);
     public void onPackageLoaded(...);
-    public void onSystemServerLoaded(...);
+    public void onPackageReady(...);
+    public void onSystemServerStarting(...);
 }
 
 # Gesture handler invoked via Proxy
