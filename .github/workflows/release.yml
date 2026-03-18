@@ -64,6 +64,17 @@ jobs:
           body: ${{ steps.cliff.outputs.content || format('Release {0}', github.ref_name) }}
           draft: false
 
+      - name: Mirror to Xposed-Modules-Repo
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: Xposed-Modules-Repo/eu.hxreborn.tfs
+          token: ${{ secrets.XPOSED_REPO_PAT }}
+          prerelease: ${{ steps.version.outputs.prerelease }}
+          body: ${{ steps.cliff.outputs.content || format('Release {0}', github.ref_name) }}
+          files: app/build/outputs/apk/release/*.apk
+          fail_on_unmatched_files: true
+          make_latest: true
+
       - name: Cleanup keystore
         if: always()
         run: rm -f app/release.p12
