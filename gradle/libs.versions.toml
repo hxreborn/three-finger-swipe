@@ -1,6 +1,6 @@
 [versions]
 # Core
-kotlin = "2.3.10"
+kotlin = "2.3.20"
 agp = "9.1.0"
 composeBom = "2026.02.01"
 
