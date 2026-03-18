@@ -5,12 +5,12 @@ import eu.hxreborn.tfs.util.log
 import eu.hxreborn.tfs.util.methodAccessible
 import eu.hxreborn.tfs.xposed.hook.PhoneWindowManagerHooker
 import io.github.libxposed.api.XposedModule
-import io.github.libxposed.api.XposedModuleInterface.SystemServerLoadedParam
+import io.github.libxposed.api.XposedModuleInterface.SystemServerStartingParam
 
 object SystemServerHooks {
     fun hook(
         module: XposedModule,
-        param: SystemServerLoadedParam,
+        param: SystemServerStartingParam,
         prefs: SharedPreferences?,
     ) {
         PhoneWindowManagerHooker.init(prefs)
@@ -18,10 +18,9 @@ object SystemServerHooks {
             param.classLoader.loadClass(
                 "com.android.server.policy.PhoneWindowManager",
             )
-        module.hook(
-            phoneWindowManager.methodAccessible("systemReady"),
-            PhoneWindowManagerHooker::class.java,
-        )
+        module
+            .hook(phoneWindowManager.methodAccessible("systemReady"))
+            .intercept(PhoneWindowManagerHooker.createInterceptor())
         log("Registered PhoneWindowManager.systemReady hook")
     }
 }

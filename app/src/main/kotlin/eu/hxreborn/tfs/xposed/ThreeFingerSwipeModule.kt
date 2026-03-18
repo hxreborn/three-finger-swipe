@@ -1,36 +1,30 @@
 package eu.hxreborn.tfs.xposed
 
+import android.util.Log
 import eu.hxreborn.tfs.BuildConfig
+import eu.hxreborn.tfs.ModuleConstants
 import eu.hxreborn.tfs.prefs.Prefs
 import eu.hxreborn.tfs.util.Logger
-import io.github.libxposed.api.XposedInterface
+import eu.hxreborn.tfs.util.log
 import io.github.libxposed.api.XposedModule
 import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
-import io.github.libxposed.api.XposedModuleInterface.SystemServerLoadedParam
+import io.github.libxposed.api.XposedModuleInterface.SystemServerStartingParam
 
-class ThreeFingerSwipeModule(
-    base: XposedInterface,
-    param: ModuleLoadedParam,
-) : XposedModule(base, param) {
-    init {
+class ThreeFingerSwipeModule : XposedModule() {
+    override fun onModuleLoaded(param: ModuleLoadedParam) {
         Logger.attach(this)
         log(
-            "Module v${BuildConfig.VERSION_NAME} on " +
-                "${base.frameworkName} ${base.frameworkVersion}",
+            Log.INFO,
+            ModuleConstants.LOG_TAG,
+            "Module v${BuildConfig.VERSION_NAME} on $frameworkName $frameworkVersion",
         )
     }
 
-    override fun onSystemServerLoaded(param: SystemServerLoadedParam) {
-        super.onSystemServerLoaded(param)
-
+    override fun onSystemServerStarting(param: SystemServerStartingParam) {
         val prefs =
             runCatching { getRemotePreferences(Prefs.GROUP) }
-                .onFailure {
-                    log(
-                        "Remote prefs unavailable, using defaults",
-                        it,
-                    )
-                }.getOrNull()
+                .onFailure { log("Remote prefs unavailable, using defaults", it) }
+                .getOrNull()
 
         prefs?.let { p ->
             Logger.debugEnabled = Prefs.DEBUG_LOGS.read(p)
