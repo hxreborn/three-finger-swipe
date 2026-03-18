@@ -16,17 +16,12 @@ jobs:
     if: "github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'chore(release):')"
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
           cache: gradle
-
-      - name: Build libxposed
-        run: ./gradlew buildLibxposed --no-daemon
 
       - name: Build
         run: ./gradlew assembleDebug assembleRelease --no-daemon --no-configuration-cache

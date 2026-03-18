@@ -13,7 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          submodules: recursive
           fetch-depth: 0
 
       - uses: actions/setup-java@v5
@@ -34,9 +33,6 @@ jobs:
 
       - name: Decode signing keystore
         run: echo "${{ secrets.RELEASE_KEYSTORE }}" | base64 -d > app/release.p12
-
-      - name: Build libxposed
-        run: ./gradlew buildLibxposed --no-daemon
 
       - name: Build signed APKs
         run: ./gradlew assembleDebugRelease --no-daemon --no-configuration-cache
