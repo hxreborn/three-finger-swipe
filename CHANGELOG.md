@@ -1,9 +1,13 @@
 # Changelog
 
 
+### Changed
+
+- Use module name as log tag by @hxreborn
+
 ### Fixed
 
-- Prevent resource obfuscation from breaking aboutlibraries by @hxreborn
+- Fix licenses screen crash from AGP 9 resource obfuscation by @hxreborn
 - Update cliff.toml for git-cliff 2.x template API by @hxreborn
 
 ### Added
