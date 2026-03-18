@@ -1,4 +1,4 @@
 minApiVersion=101
 targetApiVersion=101
 staticScope=true
-description=Standalone LSPosed implementation of the three-finger swipe gesture for screenshots and other actions
+description=Standalone LSPosed API 101 implementation of the three-finger swipe gesture for screenshots and other actions
