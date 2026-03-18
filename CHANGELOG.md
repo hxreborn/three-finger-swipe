@@ -1,6 +1,15 @@
 # Changelog
 
 
+### Fixed
+
+- Prevent resource obfuscation from breaking aboutlibraries by @hxreborn
+- Update cliff.toml for git-cliff 2.x template API by @hxreborn
+
+### Added
+
+- Migrate to libxposed API 101 ([#14](https://github.com/hxreborn/three-finger-swipe/pull/14)) by @hxreborn
+
 ### Added
 
 - Implement screen off, flashlight, and ringer mode actions by @hxreborn
