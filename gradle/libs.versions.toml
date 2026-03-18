@@ -5,8 +5,8 @@ agp = "9.1.0"
 composeBom = "2026.02.01"
 
 # libxposed
-libxposedApi = "100"
-libxposedService = "100-1.0.0"
+libxposedApi = "101.0.0"
+libxposedService = "101.0.0"
 
 # AndroidX
 activityCompose = "1.13.0"
