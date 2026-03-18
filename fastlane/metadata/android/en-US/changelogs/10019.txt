@@ -1,0 +1,1 @@
+Fixed crash when opening licenses screen in release builds
