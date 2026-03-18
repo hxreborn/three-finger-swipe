@@ -20,7 +20,6 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.aboutlibraries)
-    alias(libs.plugins.ktlint)
 }
 
 // Renames the APK output file for a variant using the Artifacts transform API (AGP 9+).
@@ -167,10 +166,26 @@ android {
 
 kotlin { jvmToolchain(21) }
 
-ktlint {
-    version.set("1.8.0")
-    android.set(true)
-    ignoreFailures.set(false)
+val ktlintCli: Configuration by configurations.creating
+
+dependencies {
+    ktlintCli(libs.ktlint.cli)
+}
+
+tasks.register<JavaExec>("ktlintCheck") {
+    group = "verification"
+    description = "Check Kotlin code style"
+    classpath = ktlintCli
+    mainClass.set("com.pinterest.ktlint.Main")
+    args("src/**/*.kt")
+}
+
+tasks.register<JavaExec>("ktlintFormat") {
+    group = "verification"
+    description = "Fix Kotlin code style violations"
+    classpath = ktlintCli
+    mainClass.set("com.pinterest.ktlint.Main")
+    args("-F", "src/**/*.kt")
 }
 
 aboutLibraries {
