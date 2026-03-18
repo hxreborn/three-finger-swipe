@@ -3,13 +3,8 @@
 ## Build setup
 
 ```bash
-git clone --recurse-submodules https://github.com/hxreborn/three-finger-swipe.git
+git clone https://github.com/hxreborn/three-finger-swipe.git
 cd three-finger-swipe
-
-# First time: publish libxposed API + service to mavenLocal
-./gradlew buildLibxposed
-
-# Build debug APK
 ./gradlew assembleDebug
 ```
 

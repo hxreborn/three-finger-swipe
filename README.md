@@ -54,13 +54,8 @@ This module only hooks `PhoneWindowManager` in `system_server`. CaptureSposed an
 You need JDK 21 and the Android SDK.
 
 ```bash
-git clone --recurse-submodules https://github.com/hxreborn/three-finger-swipe.git
+git clone https://github.com/hxreborn/three-finger-swipe.git
 cd three-finger-swipe
-
-# Build libxposed dependencies (first time only)
-./gradlew buildLibxposed
-
-# Build debug APK
 ./gradlew :app:assembleDebug
 ```
 
