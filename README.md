@@ -4,7 +4,7 @@ Standalone implementation of three-finger swipe screenshots using the modern LSP
 <p align="center">
   <a href="https://developer.android.com"><img src="https://img.shields.io/badge/Android-9%E2%80%9316-3DDC84?style=flat&logo=android&logoColor=white" alt="Android 9-16" /></a>
   <a href="https://github.com/LSPosed/LSPosed"><img src="https://img.shields.io/badge/LSPosed_API-101-8F00FF?style=flat" alt="LSPosed API 101" /></a>
-  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Kotlin-2.3.10-7F52FF?style=flat&logo=kotlin&logoColor=white" alt="Kotlin" /></a>
+  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Kotlin-2.3.20-7F52FF?style=flat&logo=kotlin&logoColor=white" alt="Kotlin" /></a>
   <a href="https://developer.android.com/compose"><img src="https://img.shields.io/badge/Compose-Material_3_Expressive-4285F4?style=flat&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose" /></a>
   <a href="https://gradle.org"><img src="https://img.shields.io/badge/Gradle-9.4.0-02303A?style=flat&logo=gradle&logoColor=white" alt="Gradle" /></a>
   <a href="https://developer.android.com/build"><img src="https://img.shields.io/badge/AGP-9.1.0-02303A?style=flat&logo=android&logoColor=white" alt="AGP" /></a>
