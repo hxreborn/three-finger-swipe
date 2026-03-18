@@ -17,7 +17,7 @@ coreSplashscreen = "1.2.0"
 # UI
 material3 = "1.5.0-alpha15"
 lottie = "6.7.1"
-composePreferences = "2.1.1"
+composePreferences = "2.2.0"
 
 # Navigation
 navigation3 = "1.0.1"
