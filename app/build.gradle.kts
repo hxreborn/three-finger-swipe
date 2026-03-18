@@ -1,14 +1,11 @@
 import com.android.build.api.artifact.ArtifactTransformationRequest
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.BuiltArtifact
-import com.mikepenz.aboutlibraries.plugin.AboutLibrariesTask
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -44,22 +41,6 @@ abstract class RenameApkTask : DefaultTask() {
             File(artifact.outputFile).copyTo(output, overwrite = true)
             output
         }
-    }
-}
-
-// Copies the AboutLibraries JSON export into the variant's raw resources directory.
-abstract class PrepareAboutLibrariesTask : DefaultTask() {
-    @get:InputFile
-    abstract val jsonFile: RegularFileProperty
-
-    @get:OutputDirectory
-    abstract val outputDir: DirectoryProperty
-
-    @TaskAction
-    fun prepare() {
-        val rawDir = outputDir.get().dir("raw").asFile
-        rawDir.mkdirs()
-        jsonFile.get().asFile.copyTo(rawDir.resolve("aboutlibraries.json"), overwrite = true)
     }
 }
 
@@ -188,14 +169,15 @@ tasks.register<JavaExec>("ktlintFormat") {
     args("-F", "src/**/*.kt")
 }
 
-aboutLibraries {
-    android {
-        registerAndroidTasks.set(false)
-    }
-    collect {
-        filterVariants.add("release")
-    }
+val copyAboutLibraries by tasks.registering(Copy::class) {
+    dependsOn("exportLibraryDefinitions")
+    from("build/generated/aboutLibraries/aboutlibraries.json")
+    into("build/generated/aboutLibrariesRes/raw")
 }
+
+android.sourceSets["main"]
+    .res.directories
+    .add("build/generated/aboutLibrariesRes")
 
 androidComponents {
     onVariants { variant ->
@@ -213,19 +195,11 @@ androidComponents {
                 .wiredWithDirectories(RenameApkTask::inputDir, RenameApkTask::outputDir)
                 .toTransformMany(SingleArtifact.APK)
         renameTask.configure { transformRequest.set(request) }
-
-        // AboutLibraries workaround: the variant-specific task emits empty JSON so we copy
-        // from the working exportLibraryDefinitions task into raw resources instead.
-        val prepareTask =
-            tasks.register("prepareLibraryDefinitions$variantTaskSuffix", PrepareAboutLibrariesTask::class.java) {
-                jsonFile.set(layout.buildDirectory.file("generated/aboutLibraries/aboutlibraries.json"))
-                outputDir.set(layout.buildDirectory.dir("generated/aboutLibraries/${variant.name}/res"))
-                // exportLibraryDefinitions registered by the plugin in afterEvaluate;
-                // resolve lazily here so the task graph picks it up correctly
-                dependsOn(tasks.named("exportLibraryDefinitions", AboutLibrariesTask::class.java))
-            }
-        variant.sources.res?.addGeneratedSourceDirectory(prepareTask, PrepareAboutLibrariesTask::outputDir)
     }
+}
+
+tasks.named("preBuild").configure {
+    dependsOn(copyAboutLibraries)
 }
 
 tasks.named("check").configure {
