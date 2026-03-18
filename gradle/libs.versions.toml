@@ -2,7 +2,7 @@
 # Core
 kotlin = "2.3.20"
 agp = "9.1.0"
-composeBom = "2026.02.01"
+composeBom = "2026.03.00"
 
 # libxposed
 libxposedApi = "101.0.0"
@@ -11,7 +11,7 @@ libxposedService = "101.0.0"
 # AndroidX
 activityCompose = "1.13.0"
 lifecycleRuntimeKtx = "2.10.0"
-coreKtx = "1.17.0"
+coreKtx = "1.18.0"
 coreSplashscreen = "1.2.0"
 
 # UI
