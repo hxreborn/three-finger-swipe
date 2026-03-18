@@ -19,7 +19,7 @@ object Logger {
     }
 
     fun log(message: String) {
-        module?.log(message)
+        module?.log(Log.INFO, tag, message)
         Log.i(tag, message)
     }
 
@@ -27,7 +27,7 @@ object Logger {
         message: String,
         throwable: Throwable,
     ) {
-        module?.log(message, throwable)
+        module?.log(Log.ERROR, tag, message, throwable)
         Log.e(tag, message, throwable)
     }
 
