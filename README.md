@@ -30,7 +30,7 @@ Standalone implementation of three-finger swipe screenshots using the modern LSP
 ## Requirements
 
 - Android 9 through 16 (API 28-36)
-- [LSPosed](https://github.com/JingMatrix/LSPosed) (JingMatrix fork recommended, Manager 2.0.0+ for API 101)
+- An LSPosed Manager version with API 101 support (required for now)
 
 ## Installation
 
