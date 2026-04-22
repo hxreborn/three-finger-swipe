@@ -23,7 +23,7 @@ composePreferences = "2.2.0"
 navigation3 = "1.0.1"
 
 # Serialization
-kotlinxSerialization = "1.10.0"
+kotlinxSerialization = "1.11.0"
 
 # About
 aboutlibrariesPlugin = "13.2.1"
