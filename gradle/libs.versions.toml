@@ -15,7 +15,7 @@ coreKtx = "1.18.0"
 coreSplashscreen = "1.2.0"
 
 # UI
-material3 = "1.5.0-alpha16"
+material3 = "1.5.0-alpha17"
 lottie = "6.7.1"
 composePreferences = "2.2.0"
 
