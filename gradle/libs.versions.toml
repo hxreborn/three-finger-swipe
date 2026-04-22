@@ -20,7 +20,7 @@ lottie = "6.7.1"
 composePreferences = "2.2.0"
 
 # Navigation
-navigation3 = "1.0.1"
+navigation3 = "1.1.0"
 
 # Serialization
 kotlinxSerialization = "1.10.0"
