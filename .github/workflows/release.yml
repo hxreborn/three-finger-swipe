@@ -21,10 +21,12 @@ jobs:
           java-version: '21'
           cache: gradle
 
-      - name: Detect prerelease
+      - name: Detect version
         id: version
         run: |
           VERSION_NAME=${GITHUB_REF#refs/tags/v}
+          echo "name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "code=$(grep '^version\.code=' gradle.properties | cut -d= -f2)" >> $GITHUB_OUTPUT
           if [[ "$VERSION_NAME" =~ (rc|alpha|beta) ]]; then
             echo "prerelease=true" >> $GITHUB_OUTPUT
           else
@@ -65,6 +67,7 @@ jobs:
         with:
           repository: Xposed-Modules-Repo/eu.hxreborn.tfs
           token: ${{ secrets.XPOSED_REPO_PAT }}
+          tag_name: ${{ steps.version.outputs.code }}-${{ steps.version.outputs.name }}
           prerelease: ${{ steps.version.outputs.prerelease }}
           body: ${{ steps.cliff.outputs.content || format('Release {0}', github.ref_name) }}
           files: app/build/outputs/apk/release/*.apk
