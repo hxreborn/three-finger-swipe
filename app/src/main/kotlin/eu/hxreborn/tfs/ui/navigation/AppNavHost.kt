@@ -37,13 +37,13 @@ fun AppNavHost(viewModel: SettingsViewModel) {
     val slideDistance = with(density) { 30.dp.roundToPx() }
     val navigateUp = {
         if (backStack.size > 1) {
-            backStack.removeLast()
+            backStack.removeAt(backStack.lastIndex)
         }
         Unit
     }
     val handleSystemBack = {
         if (backStack.size > 1) {
-            backStack.removeLast()
+            backStack.removeAt(backStack.lastIndex)
         } else {
             activity?.finish()
         }
