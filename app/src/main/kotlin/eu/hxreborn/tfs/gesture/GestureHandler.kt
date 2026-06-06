@@ -1,22 +1,23 @@
 package eu.hxreborn.tfs.gesture
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.PointF
 import android.os.SystemClock
 import android.view.InputDevice
 import android.view.MotionEvent
 import eu.hxreborn.tfs.action.ActionId
-import eu.hxreborn.tfs.prefs.Prefs
-import eu.hxreborn.tfs.prefs.readOrDefault
 import eu.hxreborn.tfs.util.log
 import eu.hxreborn.tfs.util.logDebug
+import eu.hxreborn.tfs.xposed.hook.cooldownMs
+import eu.hxreborn.tfs.xposed.hook.edgeExclusionDp
+import eu.hxreborn.tfs.xposed.hook.fingerLandingMs
+import eu.hxreborn.tfs.xposed.hook.selectedAction
+import eu.hxreborn.tfs.xposed.hook.swipeThresholdPct
 import kotlin.math.abs
 import kotlin.math.hypot
 
 class GestureHandler(
     context: Context,
-    private val prefs: SharedPreferences?,
     private val config: GestureConfig = GestureConfig(),
     private val onTrigger: () -> Unit,
     private val onPilfer: () -> Unit = {},
@@ -25,10 +26,10 @@ class GestureHandler(
     private val smallestDimension = minOf(displayMetrics.widthPixels, displayMetrics.heightPixels)
 
     private val edgeExclusionPx: Float
-        get() = Prefs.EDGE_EXCLUSION_DP.readOrDefault(prefs) * displayMetrics.density
+        get() = edgeExclusionDp * displayMetrics.density
 
     private val swipeThresholdPx: Float
-        get() = smallestDimension * Prefs.SWIPE_THRESHOLD_PCT.readOrDefault(prefs) / 100f
+        get() = smallestDimension * swipeThresholdPct / 100f
 
     private var state: GestureState = GestureState.Idle
 
@@ -36,7 +37,7 @@ class GestureHandler(
 
     fun onPointerEvent(event: MotionEvent) {
         if (!event.isTouchscreen) return
-        if (Prefs.SELECTED_ACTION.readOrDefault(prefs) == ActionId.NO_ACTION.key) return
+        if (selectedAction == ActionId.NO_ACTION) return
 
         state =
             when (event.actionMasked) {
@@ -64,7 +65,7 @@ class GestureHandler(
 
         val points = event.points()
         val landingDuration = event.eventTime - event.downTime
-        val landingWindowMs = Prefs.FINGER_LANDING_MS.readOrDefault(prefs).toLong()
+        val landingWindowMs = fingerLandingMs.toLong()
         val exclusion = edgeExclusionPx
 
         logDebug {
@@ -74,17 +75,17 @@ class GestureHandler(
                 }
             "Gesture start: $positions landing=${landingDuration}ms " +
                 "edge=${exclusion.toInt()}px threshold=${swipeThresholdPx.toInt()}px " +
-                "cooldown=${Prefs.COOLDOWN_MS.readOrDefault(prefs)}ms"
+                "cooldown=${cooldownMs}ms"
         }
 
         return when {
             isInCooldown() -> {
-                val cooldownMs = Prefs.COOLDOWN_MS.readOrDefault(prefs).toLong()
+                val cooldown = cooldownMs.toLong()
                 val remaining =
-                    (cooldownMs - (SystemClock.elapsedRealtime() - lastTriggerTime))
+                    (cooldown - (SystemClock.elapsedRealtime() - lastTriggerTime))
                         .coerceAtLeast(0L)
                 logDebug {
-                    "Rejected: cooldown active ${remaining}ms remaining of ${cooldownMs}ms"
+                    "Rejected: cooldown active ${remaining}ms remaining of ${cooldown}ms"
                 }
                 GestureState.Idle
             }
@@ -189,8 +190,8 @@ class GestureHandler(
     }
 
     private fun isInCooldown(now: Long = SystemClock.elapsedRealtime()): Boolean {
-        val cooldownMs = Prefs.COOLDOWN_MS.readOrDefault(prefs).toLong()
-        return now - lastTriggerTime < cooldownMs
+        val cooldown = cooldownMs.toLong()
+        return now - lastTriggerTime < cooldown
     }
 
     private fun Map<Int, PointF>.areGrouped(): Boolean =
