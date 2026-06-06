@@ -166,7 +166,13 @@ private fun AboutCard(
     shape: Shape,
     onClick: (() -> Unit)? = null,
 ) {
-    val rowContent: @Composable () -> Unit = {
+    Surface(
+        onClick = onClick ?: {},
+        enabled = onClick != null,
+        modifier = Modifier.fillMaxWidth(),
+        shape = shape,
+        color = MaterialTheme.colorScheme.surfaceVariant,
+    ) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -187,13 +193,6 @@ private fun AboutCard(
             }
         }
     }
-    Surface(
-        onClick = onClick ?: {},
-        enabled = onClick != null,
-        modifier = Modifier.fillMaxWidth(),
-        shape = shape,
-        color = MaterialTheme.colorScheme.surfaceVariant,
-    ) { rowContent() }
 }
 
 @Preview(showBackground = true)

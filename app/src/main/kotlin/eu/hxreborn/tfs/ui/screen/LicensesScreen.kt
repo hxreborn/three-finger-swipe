@@ -46,7 +46,7 @@ fun LicensesScreen(onBack: () -> Unit) {
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.action_navigate_up),
                         )
                     }
                 },

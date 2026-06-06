@@ -29,6 +29,7 @@
   <string name="value_approx_px">%1$d px on this device</string>
   <string name="value_approx_dp">\u2248 %1$d dp of travel on this screen</string>
   <string name="action_reset">Reset to default</string>
+  <string name="action_navigate_up">Navigate up</string>
   <string name="snackbar_reset_done">Settings reset to defaults</string>
   <string name="snackbar_undo">Undo</string>
   <string name="category_about">About</string>
