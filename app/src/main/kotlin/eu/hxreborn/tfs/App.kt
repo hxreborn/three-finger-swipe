@@ -11,12 +11,12 @@ class App : Application() {
         XposedServiceHelper.registerListener(
             object : XposedServiceHelper.OnServiceListener {
                 override fun onServiceBind(service: XposedService) {
-                    App.service = service
+                    mService = service
                     listeners.forEach { it.onServiceBind(service) }
                 }
 
                 override fun onServiceDied(service: XposedService) {
-                    App.service = null
+                    mService = null
                     listeners.forEach { it.onServiceDied(service) }
                 }
             },
@@ -24,14 +24,15 @@ class App : Application() {
     }
 
     companion object {
-        var service: XposedService? = null
+        @Volatile
+        var mService: XposedService? = null
             private set
 
         private val listeners = CopyOnWriteArrayList<XposedServiceHelper.OnServiceListener>()
 
         fun addServiceListener(l: XposedServiceHelper.OnServiceListener) {
             listeners += l
-            service?.let(l::onServiceBind)
+            mService?.let(l::onServiceBind)
         }
 
         fun removeServiceListener(l: XposedServiceHelper.OnServiceListener) {
