@@ -14,7 +14,7 @@ import io.github.libxposed.api.XposedInterface
 import java.lang.reflect.Proxy
 import java.util.concurrent.atomic.AtomicBoolean
 
-object PhoneWindowManagerHooker {
+object PhoneWindowManagerHook {
     private val registered = AtomicBoolean(false)
     private var prefs: SharedPreferences? = null
 
