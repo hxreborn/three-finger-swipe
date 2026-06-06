@@ -69,9 +69,9 @@ import androidx.compose.ui.unit.dp
 import eu.hxreborn.tfs.BuildConfig
 import eu.hxreborn.tfs.R
 import eu.hxreborn.tfs.action.ActionId
+import eu.hxreborn.tfs.prefs.AppPrefs
 import eu.hxreborn.tfs.prefs.CaptureMode
 import eu.hxreborn.tfs.prefs.Prefs
-import eu.hxreborn.tfs.prefs.PrefsState
 import eu.hxreborn.tfs.ui.component.GestureIllustration
 import eu.hxreborn.tfs.ui.navigation.Destination
 import eu.hxreborn.tfs.ui.theme.AppTheme
@@ -87,14 +87,14 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    state: PrefsState,
+    state: AppPrefs,
     pendingReboot: Boolean,
     onActionChange: (ActionId) -> Unit,
     onFingerLandingChange: (Int) -> Unit,
     onCooldownChange: (Int) -> Unit,
     onDebugLogsChange: (Boolean) -> Unit,
     onResetToDefaults: () -> Unit,
-    onRestoreState: (PrefsState) -> Unit,
+    onRestoreState: (AppPrefs) -> Unit,
     onNavigate: (Destination) -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -532,7 +532,7 @@ private fun ActionId.labelRes(): Int =
 private fun HomeScreenPreview() {
     AppTheme(useDynamicColor = false) {
         HomeScreen(
-            state = PrefsState(),
+            state = AppPrefs(),
             pendingReboot = false,
             onActionChange = {},
             onFingerLandingChange = {},

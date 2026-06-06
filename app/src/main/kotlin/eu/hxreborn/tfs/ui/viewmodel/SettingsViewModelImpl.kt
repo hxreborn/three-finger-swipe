@@ -3,9 +3,9 @@ package eu.hxreborn.tfs.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import eu.hxreborn.tfs.prefs.AppPrefs
 import eu.hxreborn.tfs.prefs.PrefSpec
 import eu.hxreborn.tfs.prefs.PrefsRepository
-import eu.hxreborn.tfs.prefs.PrefsState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,11 +15,11 @@ import kotlinx.coroutines.flow.stateIn
 class SettingsViewModelImpl(
     private val repository: PrefsRepository,
 ) : SettingsViewModel() {
-    override val uiState: StateFlow<PrefsState> =
+    override val uiState: StateFlow<AppPrefs> =
         repository.state.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = PrefsState(),
+            initialValue = AppPrefs(),
         )
 
     private val _pendingReboot = MutableStateFlow(false)
@@ -45,7 +45,7 @@ class SettingsViewModelImpl(
         _pendingReboot.value = true
     }
 
-    override fun restoreState(state: PrefsState) {
+    override fun restoreState(state: AppPrefs) {
         repository.restoreState(state)
         _pendingReboot.value = true
     }

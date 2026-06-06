@@ -19,7 +19,7 @@ class PrefsRepository(
         prefs?.let { syncLocalToRemote() }
     }
 
-    val state: Flow<PrefsState> =
+    val state: Flow<AppPrefs> =
         callbackFlow {
             fun sendState() = trySend(readState())
             sendState()
@@ -47,7 +47,7 @@ class PrefsRepository(
         pushToRemote { Prefs.all.forEach { it.reset(this) } }
     }
 
-    fun restoreState(state: PrefsState) {
+    fun restoreState(state: AppPrefs) {
         localPrefs.edit {
             Prefs.DEBUG_LOGS.write(this, state.debugLogs)
             Prefs.SWIPE_THRESHOLD_PCT.write(this, state.swipeThresholdPct)
@@ -87,7 +87,7 @@ class PrefsRepository(
     }
 
     private fun readState() =
-        PrefsState(
+        AppPrefs(
             debugLogs = Prefs.DEBUG_LOGS.read(localPrefs),
             swipeThresholdPct = Prefs.SWIPE_THRESHOLD_PCT.read(localPrefs),
             edgeExclusionDp = Prefs.EDGE_EXCLUSION_DP.read(localPrefs),
@@ -98,7 +98,7 @@ class PrefsRepository(
         )
 }
 
-data class PrefsState(
+data class AppPrefs(
     val debugLogs: Boolean = Prefs.DEBUG_LOGS.default,
     val swipeThresholdPct: Int = Prefs.SWIPE_THRESHOLD_PCT.default,
     val edgeExclusionDp: Int = Prefs.EDGE_EXCLUSION_DP.default,
