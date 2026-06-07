@@ -348,7 +348,7 @@ private fun LazyListScope.timingPreference(
     @StringRes titleRes: Int,
     @StringRes summaryRes: Int,
     icon: ImageVector,
-    modifier: Modifier = Modifier.fillMaxWidth(),
+    modifier: Modifier = Modifier,
     onValueChange: (Int) -> Unit,
 ) {
     item(key = key, contentType = "TimingPreference") {
@@ -419,7 +419,7 @@ private fun LazyListScope.timingPreference(
 private fun LazyListScope.navigablePreference(
     key: String,
     title: @Composable () -> Unit,
-    modifier: Modifier = Modifier.fillMaxWidth(),
+    modifier: Modifier = Modifier,
     icon: @Composable (() -> Unit)? = null,
     summary: @Composable (() -> Unit)? = null,
     onClick: () -> Unit,
@@ -441,7 +441,7 @@ private fun LazyListScope.switchPreference(
     key: String,
     value: Boolean,
     title: @Composable (Boolean) -> Unit,
-    modifier: Modifier = Modifier.fillMaxWidth(),
+    modifier: Modifier = Modifier,
     enabled: (Boolean) -> Boolean = { true },
     icon: @Composable ((Boolean) -> Unit)? = null,
     summary: @Composable ((Boolean) -> Unit)? = null,
