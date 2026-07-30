@@ -20,7 +20,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -35,6 +34,7 @@ import kotlin.math.roundToInt
 @Composable
 fun EdgeExclusionScreen(
     edgeExclusionDp: Int,
+    modifier: Modifier = Modifier,
     onValueChange: (Int) -> Unit,
     onBack: () -> Unit,
 ) {
@@ -43,6 +43,7 @@ fun EdgeExclusionScreen(
     }
 
     SettingsDetailScaffold(
+        modifier = modifier,
         title = stringResource(R.string.screen_edge_exclusion),
         onBack = onBack,
         actions = {

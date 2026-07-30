@@ -33,12 +33,14 @@ import eu.hxreborn.tfs.ui.util.shapeForPosition
 @Composable
 fun CaptureModeScreen(
     captureMode: CaptureMode,
+    modifier: Modifier = Modifier,
     onCaptureModeChange: (CaptureMode) -> Unit,
     onBack: () -> Unit,
 ) {
     val defaultMode = CaptureMode.fromKey(Prefs.CAPTURE_MODE.default)
 
     SettingsDetailScaffold(
+        modifier = modifier,
         title = stringResource(R.string.screen_capture_mode),
         onBack = onBack,
         actions = {
@@ -51,7 +53,10 @@ fun CaptureModeScreen(
         },
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().selectableGroup(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .selectableGroup(),
         ) {
             CaptureModeCard(
                 selected = captureMode == CaptureMode.SYSTEM_API,
@@ -71,6 +76,14 @@ fun CaptureModeScreen(
                 onClick = { onCaptureModeChange(CaptureMode.SYSRQ) },
             )
         }
+
+        Spacer(Modifier.height(16.dp))
+
+        Text(
+            text = stringResource(R.string.pref_capture_mode_reboot),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -80,11 +93,12 @@ private fun CaptureModeCard(
     title: String,
     description: String,
     shape: androidx.compose.ui.graphics.Shape,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     Surface(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .selectable(selected = selected, onClick = onClick, role = Role.RadioButton),
         shape = shape,

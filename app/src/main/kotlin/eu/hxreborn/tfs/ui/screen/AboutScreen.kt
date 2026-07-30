@@ -1,6 +1,7 @@
 package eu.hxreborn.tfs.ui.screen
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.Gavel
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -40,12 +42,22 @@ import eu.hxreborn.tfs.R
 import eu.hxreborn.tfs.ui.theme.AppTheme
 import eu.hxreborn.tfs.ui.util.shapeForPosition
 
-private const val SEPARATOR = " \u00b7 "
+private const val SEPARATOR = " · "
+private const val REPO_URL = "https://github.com/hxreborn/three-finger-swipe"
+
+private class AboutEntry(
+    val icon: ImageVector,
+    val title: String,
+    val subtitle: String,
+    val onClick: (() -> Unit)? = null,
+)
 
 @Composable
 fun AboutScreen(
-    xposedActive: Boolean,
+    xposedServiceAvailable: Boolean,
+    modifier: Modifier = Modifier,
     onNavigateToLicenses: () -> Unit,
+    onTriggerHotReload: ((String) -> Unit) -> Unit = {},
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -57,11 +69,65 @@ fun AboutScreen(
             BuildConfig.GIT_HASH.takeIf { it.isNotBlank() } ?: sourceBuild,
         ).joinToString(SEPARATOR)
 
+    val entries =
+        buildList {
+            add(
+                AboutEntry(
+                    icon = Icons.Outlined.Extension,
+                    title = stringResource(R.string.about_module_status),
+                    subtitle =
+                        if (xposedServiceAvailable) {
+                            stringResource(R.string.about_module_active)
+                        } else {
+                            stringResource(R.string.about_module_inactive)
+                        },
+                ),
+            )
+            add(
+                AboutEntry(
+                    icon = Icons.Outlined.Code,
+                    title = stringResource(R.string.about_source_code),
+                    subtitle = stringResource(R.string.about_source_code_summary),
+                    onClick = { context.openUrl(REPO_URL) },
+                ),
+            )
+            add(
+                AboutEntry(
+                    icon = Icons.Outlined.Gavel,
+                    title = stringResource(R.string.about_licenses),
+                    subtitle = stringResource(R.string.about_licenses_summary),
+                    onClick = onNavigateToLicenses,
+                ),
+            )
+            add(
+                AboutEntry(
+                    icon = Icons.Outlined.BugReport,
+                    title = stringResource(R.string.about_report_issue),
+                    subtitle = stringResource(R.string.about_report_issue_summary),
+                    onClick = { context.openUrl("$REPO_URL/issues") },
+                ),
+            )
+            if (BuildConfig.DEBUG) {
+                add(
+                    AboutEntry(
+                        icon = Icons.Outlined.Refresh,
+                        title = stringResource(R.string.about_hot_reload),
+                        subtitle = stringResource(R.string.about_hot_reload_summary),
+                        onClick = {
+                            onTriggerHotReload { status ->
+                                Toast.makeText(context, status, Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                    ),
+                )
+            }
+        }
+
     SettingsDetailScaffold(
+        modifier = modifier,
         title = stringResource(R.string.category_about),
         onBack = onBack,
     ) {
-        // App header
         Column(
             modifier =
                 Modifier
@@ -100,63 +166,20 @@ fun AboutScreen(
 
         Spacer(Modifier.height(8.dp))
 
-        AboutCard(
-            icon = Icons.Outlined.Extension,
-            title = stringResource(R.string.about_module_status),
-            subtitle =
-                if (xposedActive) {
-                    stringResource(R.string.about_module_active)
-                } else {
-                    stringResource(R.string.about_module_inactive)
-                },
-            shape = shapeForPosition(4, 0),
-        )
-
-        Spacer(Modifier.height(2.dp))
-
-        AboutCard(
-            icon = Icons.Outlined.Code,
-            title = stringResource(R.string.about_source_code),
-            subtitle = stringResource(R.string.about_source_code_summary),
-            shape = shapeForPosition(4, 1),
-            onClick = {
-                context.startActivity(
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        "https://github.com/hxreborn/three-finger-swipe".toUri(),
-                    ),
-                )
-            },
-        )
-
-        Spacer(Modifier.height(2.dp))
-
-        AboutCard(
-            icon = Icons.Outlined.Gavel,
-            title = stringResource(R.string.about_licenses),
-            subtitle = stringResource(R.string.about_licenses_summary),
-            shape = shapeForPosition(4, 2),
-            onClick = onNavigateToLicenses,
-        )
-
-        Spacer(Modifier.height(2.dp))
-
-        AboutCard(
-            icon = Icons.Outlined.BugReport,
-            title = stringResource(R.string.about_report_issue),
-            subtitle = stringResource(R.string.about_report_issue_summary),
-            shape = shapeForPosition(4, 3),
-            onClick = {
-                context.startActivity(
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        "https://github.com/hxreborn/three-finger-swipe/issues".toUri(),
-                    ),
-                )
-            },
-        )
+        entries.forEachIndexed { index, entry ->
+            if (index > 0) Spacer(Modifier.height(2.dp))
+            AboutCard(
+                icon = entry.icon,
+                title = entry.title,
+                subtitle = entry.subtitle,
+                shape = shapeForPosition(entries.size, index),
+                onClick = entry.onClick,
+            )
+        }
     }
 }
+
+private fun android.content.Context.openUrl(url: String) = startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
 
 @Composable
 private fun AboutCard(
@@ -164,15 +187,10 @@ private fun AboutCard(
     title: String,
     subtitle: String,
     shape: Shape,
+    modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
-    Surface(
-        onClick = onClick ?: {},
-        enabled = onClick != null,
-        modifier = Modifier.fillMaxWidth(),
-        shape = shape,
-        color = MaterialTheme.colorScheme.surfaceVariant,
-    ) {
+    val content: @Composable () -> Unit = {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -193,6 +211,24 @@ private fun AboutCard(
             }
         }
     }
+    val cardModifier = modifier.fillMaxWidth()
+
+    if (onClick == null) {
+        Surface(
+            modifier = cardModifier,
+            shape = shape,
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            content = content,
+        )
+    } else {
+        Surface(
+            onClick = onClick,
+            modifier = cardModifier,
+            shape = shape,
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            content = content,
+        )
+    }
 }
 
 @Preview(showBackground = true)
@@ -200,7 +236,7 @@ private fun AboutCard(
 private fun AboutScreenPreview() {
     AppTheme(useDynamicColor = false) {
         AboutScreen(
-            xposedActive = false,
+            xposedServiceAvailable = false,
             onNavigateToLicenses = {},
             onBack = {},
         )

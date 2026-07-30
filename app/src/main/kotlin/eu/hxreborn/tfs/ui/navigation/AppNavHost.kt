@@ -8,12 +8,19 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
@@ -26,57 +33,55 @@ import eu.hxreborn.tfs.ui.screen.LicensesScreen
 import eu.hxreborn.tfs.ui.screen.TriggerDistanceScreen
 import eu.hxreborn.tfs.ui.viewmodel.SettingsViewModel
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun AppNavHost(viewModel: SettingsViewModel) {
+fun AppNavHost(
+    viewModel: SettingsViewModel,
+    modifier: Modifier = Modifier,
+) {
     val backStack = rememberNavBackStack(Destination.Home)
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val pendingReboot by viewModel.pendingReboot.collectAsStateWithLifecycle()
-    val xposedActive by viewModel.xposedActive.collectAsStateWithLifecycle()
+    val xposedServiceAvailable by viewModel.xposedServiceAvailable.collectAsStateWithLifecycle()
     val activity = LocalContext.current.findActivity()
     val density = LocalDensity.current
     val slideDistance = with(density) { 30.dp.roundToPx() }
-    val navigateUp = {
-        if (backStack.size > 1) {
-            backStack.removeAt(backStack.lastIndex)
+    val currentState = rememberUpdatedState(state)
+    val currentXposedServiceAvailable = rememberUpdatedState(xposedServiceAvailable)
+    val navigateUp =
+        remember(backStack) {
+            {
+                if (backStack.size > 1) {
+                    backStack.removeAt(backStack.lastIndex)
+                }
+                Unit
+            }
         }
-        Unit
-    }
-    val handleSystemBack = {
-        if (backStack.size > 1) {
-            backStack.removeAt(backStack.lastIndex)
-        } else {
-            activity?.finish()
+    val handleSystemBack =
+        remember(backStack, activity) {
+            {
+                if (backStack.size > 1) {
+                    backStack.removeAt(backStack.lastIndex)
+                } else {
+                    activity?.finish()
+                }
+                Unit
+            }
         }
-        Unit
-    }
-
-    NavDisplay(
-        backStack = backStack,
-        onBack = handleSystemBack,
-        transitionSpec = {
-            (slideInHorizontally { slideDistance } + fadeIn()) togetherWith
-                (slideOutHorizontally { -slideDistance } + fadeOut())
-        },
-        popTransitionSpec = {
-            (slideInHorizontally { -slideDistance } + fadeIn()) togetherWith
-                (slideOutHorizontally { slideDistance } + fadeOut())
-        },
-        predictivePopTransitionSpec = {
-            (slideInHorizontally { -slideDistance } + fadeIn()) togetherWith
-                (slideOutHorizontally { slideDistance } + fadeOut())
-        },
-        entryProvider =
-            entryProvider {
+    val enterSpatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntOffset>()
+    val exitSpatialSpec = MaterialTheme.motionScheme.fastSpatialSpec<IntOffset>()
+    val enterEffectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+    val exitEffectsSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+    val screenEntryProvider =
+        remember(backStack, navigateUp, viewModel) {
+            entryProvider<NavKey> {
                 entry<Destination.Home> {
                     HomeScreen(
-                        state = state,
-                        pendingReboot = pendingReboot,
+                        state = currentState.value,
                         onActionChange = { viewModel.savePref(Prefs.SELECTED_ACTION, it.key) },
                         onFingerLandingChange = {
                             viewModel.savePref(Prefs.FINGER_LANDING_MS, it)
                         },
                         onCooldownChange = { viewModel.savePref(Prefs.COOLDOWN_MS, it) },
-                        onDebugLogsChange = { viewModel.savePref(Prefs.DEBUG_LOGS, it) },
                         onResetToDefaults = viewModel::resetToDefaults,
                         onRestoreState = viewModel::restoreState,
                         onNavigate = { backStack.add(it) },
@@ -85,15 +90,17 @@ fun AppNavHost(viewModel: SettingsViewModel) {
 
                 entry<Destination.EdgeExclusion> {
                     EdgeExclusionScreen(
-                        edgeExclusionDp = state.edgeExclusionDp,
-                        onValueChange = { viewModel.savePref(Prefs.EDGE_EXCLUSION_DP, it) },
+                        edgeExclusionDp = currentState.value.edgeExclusionDp,
+                        onValueChange = {
+                            viewModel.savePref(Prefs.EDGE_EXCLUSION_DP, it)
+                        },
                         onBack = navigateUp,
                     )
                 }
 
                 entry<Destination.TriggerDistance> {
                     TriggerDistanceScreen(
-                        swipeThresholdPct = state.swipeThresholdPct,
+                        swipeThresholdPct = currentState.value.swipeThresholdPct,
                         onValueChange = {
                             viewModel.savePref(Prefs.SWIPE_THRESHOLD_PCT, it)
                         },
@@ -103,7 +110,7 @@ fun AppNavHost(viewModel: SettingsViewModel) {
 
                 entry<Destination.CaptureMode> {
                     CaptureModeScreen(
-                        captureMode = state.captureMode,
+                        captureMode = currentState.value.captureMode,
                         onCaptureModeChange = {
                             viewModel.savePref(Prefs.CAPTURE_MODE, it.key)
                         },
@@ -113,10 +120,11 @@ fun AppNavHost(viewModel: SettingsViewModel) {
 
                 entry<Destination.About> {
                     AboutScreen(
-                        xposedActive = xposedActive,
+                        xposedServiceAvailable = currentXposedServiceAvailable.value,
                         onNavigateToLicenses = {
                             backStack.add(Destination.Licenses)
                         },
+                        onTriggerHotReload = viewModel::triggerHotReload,
                         onBack = navigateUp,
                     )
                 }
@@ -124,7 +132,50 @@ fun AppNavHost(viewModel: SettingsViewModel) {
                 entry<Destination.Licenses> {
                     LicensesScreen(onBack = navigateUp)
                 }
-            },
+            }
+        }
+
+    NavDisplay(
+        modifier = modifier,
+        backStack = backStack,
+        onBack = handleSystemBack,
+        transitionSpec = {
+            (
+                slideInHorizontally(
+                    animationSpec = enterSpatialSpec,
+                ) { slideDistance } + fadeIn(animationSpec = enterEffectsSpec)
+            ) togetherWith
+                (
+                    slideOutHorizontally(
+                        animationSpec = exitSpatialSpec,
+                    ) { -slideDistance } + fadeOut(animationSpec = exitEffectsSpec)
+                )
+        },
+        popTransitionSpec = {
+            (
+                slideInHorizontally(
+                    animationSpec = enterSpatialSpec,
+                ) { -slideDistance } + fadeIn(animationSpec = enterEffectsSpec)
+            ) togetherWith
+                (
+                    slideOutHorizontally(
+                        animationSpec = exitSpatialSpec,
+                    ) { slideDistance } + fadeOut(animationSpec = exitEffectsSpec)
+                )
+        },
+        predictivePopTransitionSpec = {
+            (
+                slideInHorizontally(
+                    animationSpec = enterSpatialSpec,
+                ) { -slideDistance } + fadeIn(animationSpec = enterEffectsSpec)
+            ) togetherWith
+                (
+                    slideOutHorizontally(
+                        animationSpec = exitSpatialSpec,
+                    ) { slideDistance } + fadeOut(animationSpec = exitEffectsSpec)
+                )
+        },
+        entryProvider = screenEntryProvider,
     )
 }
 

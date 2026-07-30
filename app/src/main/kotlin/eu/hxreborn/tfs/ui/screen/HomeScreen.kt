@@ -23,9 +23,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.BorderOuter
-import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Gesture
 import androidx.compose.material.icons.outlined.HourglassEmpty
@@ -49,6 +47,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -64,6 +63,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import eu.hxreborn.tfs.BuildConfig
@@ -79,7 +80,6 @@ import eu.hxreborn.tfs.ui.util.shapeForPosition
 import kotlinx.coroutines.launch
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
-import me.zhanghai.compose.preference.SwitchPreference
 import me.zhanghai.compose.preference.preferenceCategory
 import me.zhanghai.compose.preference.preferenceTheme
 import kotlin.math.roundToInt
@@ -88,11 +88,10 @@ import kotlin.math.roundToInt
 @Composable
 fun HomeScreen(
     state: AppPrefs,
-    pendingReboot: Boolean,
+    modifier: Modifier = Modifier,
     onActionChange: (ActionId) -> Unit,
     onFingerLandingChange: (Int) -> Unit,
     onCooldownChange: (Int) -> Unit,
-    onDebugLogsChange: (Boolean) -> Unit,
     onResetToDefaults: () -> Unit,
     onRestoreState: (AppPrefs) -> Unit,
     onNavigate: (Destination) -> Unit,
@@ -102,6 +101,9 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val resetDone = stringResource(R.string.snackbar_reset_done)
     val undoLabel = stringResource(R.string.snackbar_undo)
+    val showExpandedTitle by remember(scrollBehavior) {
+        derivedStateOf { scrollBehavior.state.collapsedFraction < 0.5f }
+    }
     var showActionDialog by remember { mutableStateOf(false) }
 
     if (showActionDialog) {
@@ -116,7 +118,7 @@ fun HomeScreen(
     }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
@@ -126,7 +128,7 @@ fun HomeScreen(
                         text = stringResource(R.string.app_name),
                         maxLines = 2,
                         style =
-                            if (scrollBehavior.state.collapsedFraction < 0.5f) {
+                            if (showExpandedTitle) {
                                 MaterialTheme.typography.headlineLarge
                             } else {
                                 MaterialTheme.typography.titleLarge
@@ -147,7 +149,10 @@ fun HomeScreen(
         ) {
             val navBarsPadding = WindowInsets.navigationBars.asPaddingValues()
             LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 8.dp),
                 contentPadding =
                     PaddingValues(
                         top = innerPadding.calculateTopPadding(),
@@ -160,11 +165,14 @@ fun HomeScreen(
                     )
                 }
 
-                // Screenshot gesture
-
                 preferenceCategory(
                     key = "category_gestures",
-                    title = { Text(stringResource(R.string.category_swipe_down_action)) },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.category_swipe_down_action),
+                            modifier = Modifier.semantics { heading() },
+                        )
+                    },
                 )
 
                 navigablePreference(
@@ -176,11 +184,14 @@ fun HomeScreen(
                     onClick = { showActionDialog = true },
                 )
 
-                // Settings (navigable rows)
-
                 preferenceCategory(
                     key = "category_settings",
-                    title = { Text(stringResource(R.string.category_settings)) },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.category_settings),
+                            modifier = Modifier.semantics { heading() },
+                        )
+                    },
                 )
 
                 navigablePreference(
@@ -230,11 +241,14 @@ fun HomeScreen(
                     onClick = { onNavigate(Destination.EdgeExclusion) },
                 )
 
-                // Timing (inline sliders with 50ms steps)
-
                 preferenceCategory(
                     key = "category_timing",
-                    title = { Text(stringResource(R.string.category_timing)) },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.category_timing),
+                            modifier = Modifier.semantics { heading() },
+                        )
+                    },
                 )
 
                 timingPreference(
@@ -265,32 +279,18 @@ fun HomeScreen(
                     onValueChange = onCooldownChange,
                 )
 
-                // Advanced
-
                 preferenceCategory(
                     key = "category_advanced",
-                    title = { Text(stringResource(R.string.category_advanced)) },
-                )
-
-                switchPreference(
-                    modifier = Modifier.preferenceCard(surface, shapeForPosition(2, 0)),
-                    key = Prefs.DEBUG_LOGS.key,
-                    value = state.debugLogs,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.BugReport,
-                            contentDescription = null,
+                    title = {
+                        Text(
+                            text = stringResource(R.string.category_advanced),
+                            modifier = Modifier.semantics { heading() },
                         )
                     },
-                    title = { Text(stringResource(R.string.pref_debug_title)) },
-                    summary = { Text(stringResource(R.string.pref_debug_summary)) },
-                    onValueChange = onDebugLogsChange,
                 )
 
-                preferenceSpacer("spacer_debug")
-
                 navigablePreference(
-                    modifier = Modifier.preferenceCard(surface, shapeForPosition(2, 1)),
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(1, 0)),
                     key = "reset_to_defaults",
                     icon = { Icon(Icons.Outlined.RestartAlt, contentDescription = null) },
                     title = { Text(stringResource(R.string.pref_reset_title)) },
@@ -311,11 +311,14 @@ fun HomeScreen(
                     },
                 )
 
-                // About
-
                 preferenceCategory(
                     key = "category_about",
-                    title = { Text(stringResource(R.string.category_about)) },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.category_about),
+                            modifier = Modifier.semantics { heading() },
+                        )
+                    },
                 )
 
                 navigablePreference(
@@ -331,13 +334,9 @@ fun HomeScreen(
     }
 }
 
-// Spacer between grouped preference items
-
 private fun LazyListScope.preferenceSpacer(key: String) {
     item(key = key, contentType = "spacer") { Spacer(Modifier.height(2.dp)) }
 }
-
-// Timing preference with icon, title, reset button, description, and slider
 
 private fun LazyListScope.timingPreference(
     key: String,
@@ -414,8 +413,6 @@ private fun LazyListScope.timingPreference(
     }
 }
 
-// Navigable preference row with a trailing chevron icon
-
 private fun LazyListScope.navigablePreference(
     key: String,
     title: @Composable () -> Unit,
@@ -435,35 +432,13 @@ private fun LazyListScope.navigablePreference(
     }
 }
 
-// Switch preference item
-
-private fun LazyListScope.switchPreference(
-    key: String,
-    value: Boolean,
-    title: @Composable (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: (Boolean) -> Boolean = { true },
-    icon: @Composable ((Boolean) -> Unit)? = null,
-    summary: @Composable ((Boolean) -> Unit)? = null,
-    onValueChange: (Boolean) -> Unit,
-) {
-    item(key = key, contentType = "SwitchPreference") {
-        SwitchPreference(
-            value = value,
-            title = { title(value) },
-            modifier = modifier,
-            enabled = enabled(value),
-            icon = icon?.let { { it(value) } },
-            summary = summary?.let { { it(value) } },
-            onValueChange = onValueChange,
-        )
-    }
-}
-
 private fun Modifier.preferenceCard(
     color: Color,
     shape: Shape,
-): Modifier = padding(horizontal = 8.dp).background(color = color, shape = shape).clip(shape)
+): Modifier =
+    padding(horizontal = 8.dp)
+        .background(color = color, shape = shape)
+        .clip(shape)
 
 private fun snap(
     value: Float,
@@ -477,10 +452,12 @@ private fun snap(
 @Composable
 private fun ActionPickerDialog(
     selectedAction: ActionId,
+    modifier: Modifier = Modifier,
     onActionChange: (ActionId) -> Unit,
     onDismiss: () -> Unit,
 ) {
     AlertDialog(
+        modifier = modifier,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.pref_swipe_down_action_title)) },
         text = {
@@ -494,11 +471,12 @@ private fun ActionPickerDialog(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
+                                .padding(vertical = 12.dp)
                                 .selectable(
                                     selected = selectedAction == action,
                                     onClick = { onActionChange(action) },
                                     role = Role.RadioButton,
-                                ).padding(vertical = 12.dp),
+                                ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         RadioButton(selected = selectedAction == action, onClick = null)
@@ -525,6 +503,7 @@ private fun ActionId.labelRes(): Int =
         ActionId.SCREEN_OFF -> R.string.action_screen_off
         ActionId.TOGGLE_FLASHLIGHT -> R.string.action_toggle_flashlight
         ActionId.RINGER_MODE -> R.string.action_ringer_mode
+        ActionId.TOGGLE_SPLIT_SCREEN -> R.string.action_toggle_split_screen
     }
 
 @Preview(showBackground = true)
@@ -533,11 +512,9 @@ private fun HomeScreenPreview() {
     AppTheme(useDynamicColor = false) {
         HomeScreen(
             state = AppPrefs(),
-            pendingReboot = false,
             onActionChange = {},
             onFingerLandingChange = {},
             onCooldownChange = {},
-            onDebugLogsChange = {},
             onResetToDefaults = {},
             onRestoreState = {},
             onNavigate = {},

@@ -1,5 +1,6 @@
 package eu.hxreborn.tfs.ui.component
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
@@ -30,10 +31,15 @@ fun GestureIllustration(modifier: Modifier = Modifier) {
         LottieCompositionSpec.RawRes(R.raw.swipe_down_phone),
     )
 
-    LottieAnimation(
-        composition = composition,
-        iterations = LottieConstants.IterateForever,
-        dynamicProperties = dynamicProperties,
-        modifier = modifier.fillMaxWidth().height(200.dp),
-    )
+    Box(modifier = modifier) {
+        LottieAnimation(
+            composition = composition,
+            iterations = LottieConstants.IterateForever,
+            dynamicProperties = dynamicProperties,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+        )
+    }
 }

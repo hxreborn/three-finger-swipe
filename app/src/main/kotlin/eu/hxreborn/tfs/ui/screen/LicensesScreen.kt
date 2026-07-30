@@ -14,28 +14,39 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import eu.hxreborn.tfs.R
 import eu.hxreborn.tfs.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LicensesScreen(onBack: () -> Unit) {
+fun LicensesScreen(
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val libraries by produceLibraries(R.raw.aboutlibraries)
+    val showExpandedTitle by remember(scrollBehavior) {
+        derivedStateOf { scrollBehavior.state.collapsedFraction < 0.5f }
+    }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
                 title = {
                     Text(
                         stringResource(R.string.about_licenses),
                         style =
-                            if (scrollBehavior.state.collapsedFraction < 0.5f) {
+                            if (showExpandedTitle) {
                                 MaterialTheme.typography.headlineLarge
                             } else {
                                 MaterialTheme.typography.titleLarge
@@ -56,6 +67,7 @@ fun LicensesScreen(onBack: () -> Unit) {
         contentWindowInsets = WindowInsets(0),
     ) { innerPadding ->
         LibrariesContainer(
+            libraries = libraries,
             modifier =
                 Modifier
                     .fillMaxSize()

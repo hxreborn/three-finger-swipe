@@ -20,7 +20,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.rememberLottieComposition
 import eu.hxreborn.tfs.R
 
-// Screen area within the Lottie asset, as fractions of the composition bounds
+// screen area within the Lottie asset as fractions of the composition bounds
 private const val SCREEN_LEFT = 0.305f
 private const val SCREEN_TOP = 0.075f
 private const val SCREEN_RIGHT = 0.670f
@@ -36,55 +36,62 @@ fun LottiePhoneMock(
         LottieCompositionSpec.RawRes(R.raw.swipe_down_phone),
     )
 
-    Box(modifier = modifier.fillMaxWidth().height(200.dp)) {
-        LottieAnimation(
-            composition = composition,
-            progress = { 0f },
-            modifier = Modifier.fillMaxSize(),
-        )
+    Box(modifier = modifier) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+        ) {
+            LottieAnimation(
+                composition = composition,
+                progress = { 0f },
+                modifier = Modifier.fillMaxSize(),
+            )
 
-        Canvas(Modifier.fillMaxSize()) {
-            val comp = composition ?: return@Canvas
-            val compBounds = comp.bounds
-            val lottieAspect = compBounds.width().toFloat() / compBounds.height().toFloat()
-            val boxAspect = size.width / size.height
+            Canvas(Modifier.fillMaxSize()) {
+                val comp = composition ?: return@Canvas
+                val compBounds = comp.bounds
+                val lottieAspect = compBounds.width().toFloat() / compBounds.height().toFloat()
+                val boxAspect = size.width / size.height
 
-            // Mirror ContentScale.Fit to find where the Lottie actually renders
-            val lottieW: Float
-            val lottieH: Float
-            if (lottieAspect > boxAspect) {
-                lottieW = size.width
-                lottieH = size.width / lottieAspect
-            } else {
-                lottieH = size.height
-                lottieW = size.height * lottieAspect
-            }
-            val lottieX = (size.width - lottieW) / 2f
-            val lottieY = (size.height - lottieH) / 2f
-
-            val screenLeft = lottieX + lottieW * SCREEN_LEFT
-            val screenTop = lottieY + lottieH * SCREEN_TOP
-            val screenWidth = lottieW * (SCREEN_RIGHT - SCREEN_LEFT)
-            val screenHeight = lottieH * (SCREEN_BOTTOM - SCREEN_TOP)
-            val cornerRadius = lottieW * SCREEN_CORNER_FRACTION
-
-            val screenRect =
-                Rect(
-                    screenLeft,
-                    screenTop,
-                    screenLeft + screenWidth,
-                    screenTop + screenHeight,
-                )
-
-            val screenPath =
-                Path().apply {
-                    addRoundRect(
-                        RoundRect(rect = screenRect, cornerRadius = CornerRadius(cornerRadius)),
-                    )
+                // mirrors ContentScale.Fit to find where the Lottie actually renders
+                val lottieW: Float
+                val lottieH: Float
+                if (lottieAspect > boxAspect) {
+                    lottieW = size.width
+                    lottieH = size.width / lottieAspect
+                } else {
+                    lottieH = size.height
+                    lottieW = size.height * lottieAspect
                 }
+                val lottieX = (size.width - lottieW) / 2f
+                val lottieY = (size.height - lottieH) / 2f
 
-            clipPath(screenPath) {
-                onDrawScreen(screenRect)
+                val screenLeft = lottieX + lottieW * SCREEN_LEFT
+                val screenTop = lottieY + lottieH * SCREEN_TOP
+                val screenWidth = lottieW * (SCREEN_RIGHT - SCREEN_LEFT)
+                val screenHeight = lottieH * (SCREEN_BOTTOM - SCREEN_TOP)
+                val cornerRadius = lottieW * SCREEN_CORNER_FRACTION
+
+                val screenRect =
+                    Rect(
+                        screenLeft,
+                        screenTop,
+                        screenLeft + screenWidth,
+                        screenTop + screenHeight,
+                    )
+
+                val screenPath =
+                    Path().apply {
+                        addRoundRect(
+                            RoundRect(rect = screenRect, cornerRadius = CornerRadius(cornerRadius)),
+                        )
+                    }
+
+                clipPath(screenPath) {
+                    onDrawScreen(screenRect)
+                }
             }
         }
     }
