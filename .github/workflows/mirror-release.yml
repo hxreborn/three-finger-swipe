@@ -27,6 +27,17 @@ jobs:
             exit 1
           fi
 
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG_NAME }}
+
+      - name: Derive mirror tag
+        id: mirror_tag
+        run: |
+          code=$(grep '^version\.code=' gradle.properties | cut -d= -f2)
+          name=$(grep '^version\.name=' gradle.properties | cut -d= -f2)
+          echo "mirror_tag=${code}-${name}" >> "$GITHUB_OUTPUT"
+
       - name: Fetch release info
         id: release
         env:
@@ -60,7 +71,7 @@ jobs:
         with:
           repository: Xposed-Modules-Repo/eu.hxreborn.tfs
           token: ${{ secrets.XPOSED_REPO_PAT }}
-          tag_name: ${{ env.TAG_NAME }}
+          tag_name: ${{ steps.mirror_tag.outputs.mirror_tag }}
           name: ${{ steps.release.outputs.name }}
           body: ${{ steps.release.outputs.body }}
           prerelease: ${{ steps.release.outputs.prerelease }}

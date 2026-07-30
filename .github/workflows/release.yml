@@ -68,6 +68,7 @@ jobs:
           repository: Xposed-Modules-Repo/eu.hxreborn.tfs
           token: ${{ secrets.XPOSED_REPO_PAT }}
           tag_name: ${{ steps.version.outputs.code }}-${{ steps.version.outputs.name }}
+          name: ${{ github.ref_name }}
           prerelease: ${{ steps.version.outputs.prerelease }}
           body: ${{ steps.cliff.outputs.content || format('Release {0}', github.ref_name) }}
           files: app/build/outputs/apk/release/*.apk
