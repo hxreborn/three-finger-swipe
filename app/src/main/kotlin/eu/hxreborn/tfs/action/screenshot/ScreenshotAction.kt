@@ -1,31 +1,23 @@
 package eu.hxreborn.tfs.action.screenshot
 
 import eu.hxreborn.tfs.action.Action
-import eu.hxreborn.tfs.util.log
+import eu.hxreborn.tfs.util.Logger
 
 class ScreenshotAction(
     private val dispatch: ScreenshotDispatch?,
 ) : Action {
     override fun execute() {
-        dispatch?.dispatchOrFallback() ?: log("No screenshot dispatch path is available")
-    }
-
-    private fun ScreenshotDispatch.dispatchOrFallback() {
-        if (!handler.post { runDispatch(this, "handler") }) {
-            runDispatch(this, "fallback")
+        val dispatch = dispatch
+        if (dispatch == null) {
+            Logger.warn("screenshot skipped reason=no-dispatch")
+            return
         }
-    }
-
-    private fun runDispatch(
-        dispatch: ScreenshotDispatch,
-        origin: String,
-    ) {
         runCatching {
             dispatch.invocation()
         }.onSuccess {
-            log("Screenshot request sent [origin=$origin ${dispatch.description}]")
+            Logger.info("screenshot requested path=${dispatch.description}")
         }.onFailure {
-            log("takeScreenshot failed [origin=$origin ${dispatch.description}]", it)
+            Logger.error("screenshot request failed path=${dispatch.description}", it)
         }
     }
 }

@@ -6,7 +6,7 @@ import android.hardware.camera2.CameraManager
 import android.os.Handler
 import android.os.Looper
 import eu.hxreborn.tfs.action.Action
-import eu.hxreborn.tfs.util.log
+import eu.hxreborn.tfs.util.Logger
 
 class ToggleFlashlightAction(
     context: Context,
@@ -19,19 +19,22 @@ class ToggleFlashlightAction(
     @Volatile
     private var flashlightOn = false
 
+    private val torchCallback =
+        object : CameraManager.TorchCallback() {
+            override fun onTorchModeChanged(
+                cameraId: String,
+                enabled: Boolean,
+            ) {
+                if (cameraId == this@ToggleFlashlightAction.cameraId) {
+                    flashlightOn = enabled
+                }
+            }
+        }
+
     init {
         if (cameraId != null) {
             cameraManager.registerTorchCallback(
-                object : CameraManager.TorchCallback() {
-                    override fun onTorchModeChanged(
-                        cameraId: String,
-                        enabled: Boolean,
-                    ) {
-                        if (cameraId == this@ToggleFlashlightAction.cameraId) {
-                            flashlightOn = enabled
-                        }
-                    }
-                },
+                torchCallback,
                 Handler(Looper.getMainLooper()),
             )
         }
@@ -40,15 +43,26 @@ class ToggleFlashlightAction(
     override fun execute() {
         val id =
             cameraId ?: run {
-                log("No camera with flash found")
+                Logger.warn("flashlight unavailable reason=no-camera")
                 return
             }
+        val enabled = !flashlightOn
         runCatching {
-            cameraManager.setTorchMode(id, !flashlightOn)
+            cameraManager.setTorchMode(id, enabled)
         }.onSuccess {
-            log("Flashlight ${if (!flashlightOn) "on" else "off"}")
+            Logger.info("flashlight set enabled=$enabled")
         }.onFailure {
-            log("Flashlight toggle failed", it)
+            Logger.error("flashlight set failed enabled=$enabled", it)
+        }
+    }
+
+    override fun close() {
+        if (cameraId == null) return
+        runCatching { cameraManager.unregisterTorchCallback(torchCallback) }.onFailure {
+            Logger.warn(
+                "flashlight callback unregister failed",
+                it,
+            )
         }
     }
 
@@ -60,6 +74,6 @@ class ToggleFlashlightAction(
                     .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
             }
         }.onFailure {
-            log("Flash camera lookup failed", it)
+            Logger.warn("flashlight unavailable reason=camera-lookup", it)
         }.getOrNull()
 }

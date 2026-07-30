@@ -8,9 +8,9 @@ import android.view.InputEvent
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import eu.hxreborn.tfs.prefs.CaptureMode
+import eu.hxreborn.tfs.util.Logger
 import eu.hxreborn.tfs.util.findAllMethodsUpward
 import eu.hxreborn.tfs.util.findMethodUpward
-import eu.hxreborn.tfs.util.log
 import eu.hxreborn.tfs.util.readField
 import eu.hxreborn.tfs.util.signature
 import java.lang.reflect.Method
@@ -22,7 +22,6 @@ private const val INJECT_INPUT_EVENT_MODE_ASYNC = 0
 private const val MAX_DISPLAY_POLICY_ARGS = 4
 
 class ScreenshotDispatch(
-    val handler: Handler,
     internal val invocation: () -> Unit,
     val description: String,
 )
@@ -35,26 +34,22 @@ internal object ScreenshotActionResolver {
     ): ScreenshotDispatch? =
         when (captureMode) {
             CaptureMode.SYSRQ -> {
-                resolveSysrq(phoneWindowManager, handler)
-                    ?: resolveDisplayPolicy(phoneWindowManager, handler)
+                resolveSysrq(phoneWindowManager) ?: resolveDisplayPolicy(phoneWindowManager)
                     ?: resolveScreenshotHelper(phoneWindowManager, handler)
             }
 
             CaptureMode.SYSTEM_API -> {
-                resolveDisplayPolicy(phoneWindowManager, handler)
+                resolveDisplayPolicy(phoneWindowManager)
                     ?: resolveScreenshotHelper(phoneWindowManager, handler)
             }
         }.also {
             if (it == null) {
-                log("ScreenshotActionResolver: no screenshot method found")
+                Logger.warn("screenshot unavailable reason=no-method")
             }
         }
 
-    // SYSRQ injection, apps can eat it before PWM handles it so last resort only
-    private fun resolveSysrq(
-        phoneWindowManager: Any,
-        handler: Handler,
-    ): ScreenshotDispatch? {
+    // SYSRQ injection is last resort only because apps can eat it before PWM handles it
+    private fun resolveSysrq(phoneWindowManager: Any): ScreenshotDispatch? {
         val inputManager = phoneWindowManager.readField("mInputManager") ?: return null
         val method =
             inputManager.javaClass.findMethodUpward(
@@ -62,15 +57,14 @@ internal object ScreenshotActionResolver {
                 InputEvent::class.java,
                 Int::class.javaPrimitiveType!!,
             ) ?: run {
-                log("ScreenshotActionResolver: injectInputEvent not found for SYSRQ path")
+                Logger.warn("screenshot path unavailable reason=sysrq")
                 return null
             }
 
         val summary = "SYSRQ ${method.signature()} mode=$INJECT_INPUT_EVENT_MODE_ASYNC"
-        log("ScreenshotActionResolver: resolved $summary")
+        Logger.info("screenshot path resolved mode=sysrq method=${method.signature()}")
 
         return ScreenshotDispatch(
-            handler = handler,
             invocation = {
                 val now = SystemClock.uptimeMillis()
                 method.invoke(
@@ -88,35 +82,29 @@ internal object ScreenshotActionResolver {
         )
     }
 
-    // Same path the system uses for hardware button screenshots, skips app key handling
-    // DisplayPolicy.takeScreenshot() exists from Android 9 to Android 14, removed in 15
+    // same path the system uses for hardware button screenshots and skips app key handling
+    // DisplayPolicy.takeScreenshot() exists from A9 to A14 and is gone in A15
     // https://cs.android.com/android/platform/superproject/main/+/main:services/core/java/com/android/server/wm/DisplayPolicy.java
-    private fun resolveDisplayPolicy(
-        phoneWindowManager: Any,
-        handler: Handler,
-    ): ScreenshotDispatch? {
+    private fun resolveDisplayPolicy(phoneWindowManager: Any): ScreenshotDispatch? {
         val target = phoneWindowManager.readField("mDefaultDisplayPolicy") ?: phoneWindowManager
 
-        // Exact: takeScreenshot(int, int)
         target.javaClass
             .findMethodUpward(
                 "takeScreenshot",
                 Int::class.javaPrimitiveType!!,
                 Int::class.javaPrimitiveType!!,
             )?.let { m ->
-                return dispatchDisplayPolicy(target, m, handler, "exact(int,int)")
+                return dispatchDisplayPolicy(target, m, "exact(int,int)")
             }
 
-        // Exact: takeScreenshot(int)
         target.javaClass
             .findMethodUpward(
                 "takeScreenshot",
                 Int::class.javaPrimitiveType!!,
             )?.let { m ->
-                return dispatchDisplayPolicy(target, m, handler, "exact(int)")
+                return dispatchDisplayPolicy(target, m, "exact(int)")
             }
 
-        // Runtime scan: any takeScreenshot with int-only params (up to 4)
         target.javaClass
             .findAllMethodsUpward("takeScreenshot")
             .filter { m ->
@@ -124,31 +112,29 @@ internal object ScreenshotActionResolver {
                     m.parameterCount in 1..MAX_DISPLAY_POLICY_ARGS
             }.maxByOrNull { it.parameterCount }
             ?.let { m ->
-                return dispatchDisplayPolicy(target, m, handler, "scan")
+                return dispatchDisplayPolicy(target, m, "scan")
             }
 
-        log("ScreenshotActionResolver: takeScreenshot not found on DisplayPolicy")
+        Logger.warn("screenshot path unavailable reason=display-policy")
         return null
     }
 
     private fun dispatchDisplayPolicy(
         target: Any,
         method: Method,
-        handler: Handler,
         origin: String,
     ): ScreenshotDispatch {
         val defaults = intArrayOf(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_VENDOR_GESTURE, 0, 0)
         val args = defaults.take(method.parameterCount).map { it as Any }.toTypedArray()
         val summary = "DisplayPolicy[$origin] ${method.signature()}"
-        log("ScreenshotActionResolver: resolved $summary")
+        Logger.info("screenshot path resolved mode=display-policy method=${method.signature()}")
         return ScreenshotDispatch(
-            handler = handler,
             invocation = { method.invoke(target, *args) },
             description = summary,
         )
     }
 
-    // Fallback for Android 15+ where DisplayPolicy.takeScreenshot() is gone
+    // fallback for A15+ where DisplayPolicy.takeScreenshot() is gone
     // https://cs.android.com/android/platform/superproject/main/+/main:core/java/com/android/internal/util/ScreenshotHelper.java
     private fun resolveScreenshotHelper(
         phoneWindowManager: Any,
@@ -165,7 +151,7 @@ internal object ScreenshotActionResolver {
                     classLoader,
                 )
 
-            // Prefer the field already on DisplayPolicy/PhoneWindowManager
+            // prefers the field already on DisplayPolicy or PhoneWindowManager
             val displayPolicy = phoneWindowManager.readField("mDefaultDisplayPolicy")
             val displayPolicyHelper = displayPolicy?.readField("mScreenshotHelper")
             val helper =
@@ -181,15 +167,14 @@ internal object ScreenshotActionResolver {
                 ) ?: return null
 
             val summary = "ScreenshotHelper ${method.signature()}"
-            log("ScreenshotActionResolver: resolved $summary")
+            Logger.info("screenshot path resolved mode=helper method=${method.signature()}")
 
             ScreenshotDispatch(
-                handler = handler,
                 invocation = { method.invoke(helper, SCREENSHOT_VENDOR_GESTURE, handler, null) },
                 description = summary,
             )
         }.onFailure {
-            log("ScreenshotActionResolver: ScreenshotHelper resolution failed", it)
+            Logger.warn("screenshot path unavailable reason=helper", it)
         }.getOrNull()
 }
 

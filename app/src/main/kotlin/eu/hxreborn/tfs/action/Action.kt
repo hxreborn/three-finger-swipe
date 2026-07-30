@@ -1,5 +1,7 @@
 package eu.hxreborn.tfs.action
 
-fun interface Action {
+fun interface Action : AutoCloseable {
     fun execute()
+
+    override fun close() = Unit
 }

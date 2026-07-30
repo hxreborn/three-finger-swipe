@@ -4,25 +4,27 @@ import android.content.Context
 import android.os.PowerManager
 import android.os.SystemClock
 import eu.hxreborn.tfs.action.Action
+import eu.hxreborn.tfs.util.Logger
 import eu.hxreborn.tfs.util.findMethodUpward
-import eu.hxreborn.tfs.util.log
 
 class ScreenOffAction(
-    private val context: Context,
+    context: Context,
 ) : Action {
+    private val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+    private val goToSleep =
+        powerManager.javaClass.findMethodUpward(
+            "goToSleep",
+            Long::class.javaPrimitiveType!!,
+        )
+
     override fun execute() {
         runCatching {
-            val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-            val method =
-                pm.javaClass.findMethodUpward(
-                    "goToSleep",
-                    Long::class.javaPrimitiveType!!,
-                ) ?: error("PowerManager.goToSleep(long) not found")
-            method.invoke(pm, SystemClock.uptimeMillis())
+            val method = goToSleep ?: error("PowerManager.goToSleep(long) unavailable")
+            method.invoke(powerManager, SystemClock.uptimeMillis())
         }.onSuccess {
-            log("Screen turned off")
+            Logger.info("screen off")
         }.onFailure {
-            log("Screen off failed", it)
+            Logger.error("screen off failed", it)
         }
     }
 }

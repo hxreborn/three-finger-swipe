@@ -3,25 +3,27 @@ package eu.hxreborn.tfs.action.ringer
 import android.content.Context
 import android.media.AudioManager
 import eu.hxreborn.tfs.action.Action
-import eu.hxreborn.tfs.util.log
+import eu.hxreborn.tfs.util.Logger
 
 class RingerModeAction(
-    private val context: Context,
+    context: Context,
 ) : Action {
+    private val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
     override fun execute() {
         runCatching {
-            val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             val next =
-                when (am.ringerMode) {
+                when (audioManager.ringerMode) {
                     AudioManager.RINGER_MODE_NORMAL -> AudioManager.RINGER_MODE_VIBRATE
                     AudioManager.RINGER_MODE_VIBRATE -> AudioManager.RINGER_MODE_SILENT
                     else -> AudioManager.RINGER_MODE_NORMAL
                 }
-            am.ringerMode = next
+            audioManager.ringerMode = next
+            next
         }.onSuccess {
-            log("Ringer mode changed")
+            Logger.info("ringer changed mode=$it")
         }.onFailure {
-            log("Ringer mode change failed", it)
+            Logger.error("ringer change failed", it)
         }
     }
 }
