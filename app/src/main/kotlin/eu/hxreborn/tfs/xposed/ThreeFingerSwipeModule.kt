@@ -1,53 +1,105 @@
 package eu.hxreborn.tfs.xposed
 
-import android.util.Log
+import android.content.SharedPreferences
+import android.os.Handler
+import android.os.Looper
 import eu.hxreborn.tfs.BuildConfig
-import eu.hxreborn.tfs.ModuleConstants
 import eu.hxreborn.tfs.prefs.Prefs
 import eu.hxreborn.tfs.util.Logger
-import eu.hxreborn.tfs.util.log
-import eu.hxreborn.tfs.xposed.hook.debugLogs
+import eu.hxreborn.tfs.xposed.hook.PhoneWindowManagerHook
 import eu.hxreborn.tfs.xposed.hook.loadHookPrefs
 import io.github.libxposed.api.XposedModule
+import io.github.libxposed.api.XposedModuleInterface.HotReloadedParam
+import io.github.libxposed.api.XposedModuleInterface.HotReloadingParam
 import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
 import io.github.libxposed.api.XposedModuleInterface.SystemServerStartingParam
 
-// Lowercase top-level handle assigned in onModuleLoaded so hook helpers can call module.log
-// without reaching through a companion singleton. Matches the canon used by other hxreborn modules.
 @PublishedApi
 internal lateinit var module: ThreeFingerSwipeModule
+    private set
 
 class ThreeFingerSwipeModule : XposedModule() {
+    private val prefsListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { sp, _ ->
+            runCatching { loadHookPrefs(sp) }.onFailure { Logger.error("prefs refresh failed", it) }
+        }
+
     override fun onModuleLoaded(param: ModuleLoadedParam) {
         module = this
-        Logger.attach(this)
-        log(
-            Log.INFO,
-            ModuleConstants.LOG_TAG,
-            "Module v${BuildConfig.VERSION_NAME} on $frameworkName $frameworkVersion",
+        Logger.info(
+            "module loaded version=${BuildConfig.VERSION_NAME} " +
+                "framework=$frameworkName frameworkVersion=$frameworkVersion",
         )
     }
 
     override fun onSystemServerStarting(param: SystemServerStartingParam) {
-        val prefs =
-            runCatching { getRemotePreferences(Prefs.GROUP) }
-                .onFailure { log("Remote prefs unavailable, using defaults", it) }
-                .getOrNull()
+        registerPrefsListener()
 
-        prefs?.let { p ->
-            loadHookPrefs(p)
-            Logger.debugEnabled = debugLogs
-            // Strong ref kept on the prefs handle (cached above) so the listener survives GC.
-            // Fires cross-process when the companion app commits a change.
-            p.registerOnSharedPreferenceChangeListener { _, _ ->
-                loadHookPrefs(p)
-                Logger.debugEnabled = debugLogs
+        try {
+            SystemServerHooks.install(this, param)
+        } catch (e: Exception) {
+            Logger.error("system_server hook registration failed", e)
+        }
+    }
+
+    override fun onHotReloading(param: HotReloadingParam): Boolean {
+        val phoneWindowManager =
+            try {
+                PhoneWindowManagerHook.teardown()
+            } catch (e: Exception) {
+                Logger.warn("hot reload rejected reason=teardown-failed", e)
+                return false
+            }
+        if (phoneWindowManager == null) {
+            Logger.warn("hot reload rejected reason=phone-window-manager-unavailable")
+            return false
+        }
+
+        param.setSavedInstanceState(phoneWindowManager)
+        Logger.info("hot reload old generation retired")
+        return true
+    }
+
+    override fun onHotReloaded(param: HotReloadedParam) {
+        module = this
+        registerPrefsListener()
+        param.oldHookHandles.forEach { handle ->
+            try {
+                handle.unhook()
+            } catch (e: Exception) {
+                Logger.warn("hot reload old hook removal failed", e)
             }
         }
 
-        runCatching {
-            SystemServerHooks.hook(this, param)
-        }.onSuccess { log("system_server hooks applied") }
-            .onFailure { log("system_server hook registration failed", it) }
+        val phoneWindowManager = param.savedInstanceState
+        if (phoneWindowManager == null) {
+            Logger.warn("hot reload restore skipped reason=phone-window-manager-unavailable")
+            return
+        }
+
+        // input monitor setup needs the main thread's Choreographer
+        val posted =
+            Handler(Looper.getMainLooper()).post {
+                try {
+                    PhoneWindowManagerHook.install(phoneWindowManager, reloaded = true)
+                } catch (e: Exception) {
+                    Logger.error("hot reload gesture registration failed", e)
+                }
+            }
+        if (!posted) {
+            Logger.warn("hot reload restore skipped reason=main-handler-rejected")
+        }
+    }
+
+    private fun registerPrefsListener() {
+        val prefs =
+            try {
+                getRemotePreferences(Prefs.GROUP)
+            } catch (e: Exception) {
+                Logger.warn("remote prefs unavailable defaults=true", e)
+                return
+            }
+        loadHookPrefs(prefs)
+        prefs.registerOnSharedPreferenceChangeListener(prefsListener)
     }
 }

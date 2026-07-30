@@ -5,12 +5,7 @@ import eu.hxreborn.tfs.action.ActionId
 import eu.hxreborn.tfs.prefs.CaptureMode
 import eu.hxreborn.tfs.prefs.Prefs
 
-// Cached snapshot of remote prefs read once per process and refreshed by the cross-process
-// listener registered in ThreeFingerSwipeModule.onSystemServerStarting. Touch events in
-// GestureHandler read these vars directly; calling getRemotePreferences from an interceptor
-// is a Binder IPC and would block the input thread inside system_server.
-
-@Volatile internal var debugLogs: Boolean = Prefs.DEBUG_LOGS.default
+// process-local values keep RemotePreferences Binder IPC off the input thread
 
 @Volatile internal var swipeThresholdPct: Int = Prefs.SWIPE_THRESHOLD_PCT.default
 
@@ -25,7 +20,6 @@ import eu.hxreborn.tfs.prefs.Prefs
 @Volatile internal var selectedAction: ActionId = ActionId.fromKey(Prefs.SELECTED_ACTION.default)
 
 internal fun loadHookPrefs(prefs: SharedPreferences) {
-    debugLogs = Prefs.DEBUG_LOGS.read(prefs)
     swipeThresholdPct = Prefs.SWIPE_THRESHOLD_PCT.read(prefs)
     edgeExclusionDp = Prefs.EDGE_EXCLUSION_DP.read(prefs)
     fingerLandingMs = Prefs.FINGER_LANDING_MS.read(prefs)
