@@ -8,6 +8,7 @@ enum class ActionId(
     SCREEN_OFF("screen_off"),
     TOGGLE_FLASHLIGHT("toggle_flashlight"),
     RINGER_MODE("ringer_mode"),
+    TOGGLE_SPLIT_SCREEN("toggle_split_screen"),
     ;
 
     companion object {

@@ -6,6 +6,7 @@ import eu.hxreborn.tfs.action.ringer.RingerModeAction
 import eu.hxreborn.tfs.action.screenoff.ScreenOffAction
 import eu.hxreborn.tfs.action.screenshot.ScreenshotAction
 import eu.hxreborn.tfs.action.screenshot.ScreenshotDispatch
+import eu.hxreborn.tfs.action.splitscreen.ToggleSplitScreenAction
 
 object ActionRegistry {
     val all: List<ActionId> = ActionId.entries
@@ -14,6 +15,7 @@ object ActionRegistry {
         id: ActionId,
         context: Context,
         dispatch: ScreenshotDispatch?,
+        serverClassLoader: ClassLoader?,
     ): Action =
         when (id) {
             ActionId.NO_ACTION -> Action {}
@@ -21,5 +23,6 @@ object ActionRegistry {
             ActionId.SCREEN_OFF -> ScreenOffAction(context)
             ActionId.TOGGLE_FLASHLIGHT -> ToggleFlashlightAction(context)
             ActionId.RINGER_MODE -> RingerModeAction(context)
+            ActionId.TOGGLE_SPLIT_SCREEN -> ToggleSplitScreenAction(context, serverClassLoader)
         }
 }
