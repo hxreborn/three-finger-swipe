@@ -2,7 +2,7 @@ package eu.hxreborn.tfs.xposed.hook
 
 import android.view.MotionEvent
 import eu.hxreborn.tfs.gesture.GestureHandler
-import eu.hxreborn.tfs.util.log
+import eu.hxreborn.tfs.util.Logger
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 
@@ -18,8 +18,8 @@ internal class PointerEventListenerProxy(
             "onPointerEvent" -> {
                 (args?.firstOrNull() as? MotionEvent)?.let { event ->
                     runCatching { gestureHandler.onPointerEvent(event) }.onFailure {
-                        log(
-                            "onPointerEvent dispatch failed",
+                        Logger.error(
+                            "pointer event dispatch failed",
                             it,
                         )
                     }

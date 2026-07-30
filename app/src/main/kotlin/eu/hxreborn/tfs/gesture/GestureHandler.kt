@@ -6,8 +6,7 @@ import android.os.SystemClock
 import android.view.InputDevice
 import android.view.MotionEvent
 import eu.hxreborn.tfs.action.ActionId
-import eu.hxreborn.tfs.util.log
-import eu.hxreborn.tfs.util.logDebug
+import eu.hxreborn.tfs.util.Logger
 import eu.hxreborn.tfs.xposed.hook.cooldownMs
 import eu.hxreborn.tfs.xposed.hook.edgeExclusionDp
 import eu.hxreborn.tfs.xposed.hook.fingerLandingMs
@@ -68,14 +67,14 @@ class GestureHandler(
         val landingWindowMs = fingerLandingMs.toLong()
         val exclusion = edgeExclusionPx
 
-        logDebug {
+        Logger.debug {
             val positions =
                 points.entries.joinToString { (id, p) ->
                     "#$id(${p.x.toInt()},${p.y.toInt()})"
                 }
-            "Gesture start: $positions landing=${landingDuration}ms " +
-                "edge=${exclusion.toInt()}px threshold=${swipeThresholdPx.toInt()}px " +
-                "cooldown=${cooldownMs}ms"
+            "gesture start points=$positions landingMs=$landingDuration " +
+                "edgePx=${exclusion.toInt()} thresholdPx=${swipeThresholdPx.toInt()} " +
+                "cooldownMs=$cooldownMs"
         }
 
         return when {
@@ -84,30 +83,31 @@ class GestureHandler(
                 val remaining =
                     (cooldown - (SystemClock.elapsedRealtime() - lastTriggerTime))
                         .coerceAtLeast(0L)
-                logDebug {
-                    "Rejected: cooldown active ${remaining}ms remaining of ${cooldown}ms"
+                Logger.debug {
+                    "gesture reject reason=cooldown remainingMs=$remaining cooldownMs=$cooldown"
                 }
                 GestureState.Idle
             }
 
             landingDuration > landingWindowMs -> {
-                logDebug {
-                    "Rejected: landing ${landingDuration}ms > window ${landingWindowMs}ms"
+                Logger.debug {
+                    "gesture reject reason=landing landingMs=$landingDuration " +
+                        "windowMs=$landingWindowMs"
                 }
                 GestureState.Idle
             }
 
             !points.areGrouped() -> {
-                logDebug {
+                Logger.debug {
                     val spread = points.values.maxSpread()
-                    "Rejected: spread ${spread.toInt()}px > " +
-                        "proximity ${config.startingProximityPx.toInt()}px"
+                    "gesture reject reason=spread spreadPx=${spread.toInt()} " +
+                        "limitPx=${config.startingProximityPx.toInt()}"
                 }
                 GestureState.Idle
             }
 
             points.startsNearEdge() -> {
-                logDebug {
+                Logger.debug {
                     val w = displayMetrics.widthPixels
                     val h = displayMetrics.heightPixels
                     val offending =
@@ -116,8 +116,8 @@ class GestureHandler(
                                 p.x < exclusion || p.x > w - exclusion ||
                                     p.y < exclusion || p.y > h - exclusion
                             }.joinToString { (id, p) -> "#$id(${p.x.toInt()},${p.y.toInt()})" }
-                    "Rejected: near edge $offending " +
-                        "exclusion=${exclusion.toInt()}px screen=${w}x$h"
+                    "gesture reject reason=edge points=$offending " +
+                        "exclusionPx=${exclusion.toInt()} screen=${w}x$h"
                 }
                 GestureState.Idle
             }
@@ -176,8 +176,8 @@ class GestureHandler(
 
         val heldDuration = event.eventTime - tracking.startTimeMs
         lastTriggerTime = now
-        log("Swipe fired: held=${heldDuration}ms threshold=${threshold.toInt()}px")
-        logDebug {
+        Logger.info("gesture fired heldMs=$heldDuration thresholdPx=${threshold.toInt()}")
+        Logger.debug {
             tracking.startPoints.entries.joinToString(" ") { (id, start) ->
                 val cur = currentPoints[id]
                 val dy = cur?.let { it.y - start.y }?.toInt() ?: 0
