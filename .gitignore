@@ -2,25 +2,21 @@
 .gradle/
 **/build/
 .kotlin/
-.kls_database.db
+gradle/gradle-daemon-jvm.properties
 
 # IDE / Editor
 .idea/
 *.iml
-*.ipr
-*.iws
+out/
 .vscode/
 *.code-workspace
-.project
-.settings/
-.classpath
 
-# Claude Code
 .claude/
+.serena/
+.mcp.json
 
 # Local configuration
 local.properties
-.mcp.json
 *.patch
 .env
 .env.local
@@ -28,17 +24,30 @@ local.properties
 # Logs / tmp
 .DS_Store
 .directory
+Thumbs.db
 *.log
+hs_err_pid*.log
 *.tmp
 *.temp
 *.swp
 *.swo
 *.db
 
+# Python tooling
+__pycache__/
+*.pyc
+
 # Documents (not code)
 *.docx
 *.txt
 !fastlane/metadata/android/**/*.txt
+
+*.md
+*.markdown
+!/README.md
+!/CHANGELOG.md
+!/CONTRIBUTING.md
+/docs/
 
 # Native build outputs
 .cxx/
@@ -50,14 +59,12 @@ outputs/
 test-output/
 *.apk
 *.aab
+*.apks
+*.xapk
 *.aar
 
 # Signing artifacts
 *.jks
 *.keystore
 *.p12
-release.keystore
-
-# Exceptions - keep these tracked
-!gradle/wrapper/gradle-wrapper.properties
-!gradle/libs.versions.toml
+keystore.properties
