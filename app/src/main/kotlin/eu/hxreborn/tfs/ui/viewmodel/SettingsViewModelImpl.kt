@@ -1,62 +1,128 @@
 package eu.hxreborn.tfs.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import eu.hxreborn.tfs.App
+import eu.hxreborn.tfs.BuildConfig
 import eu.hxreborn.tfs.prefs.AppPrefs
 import eu.hxreborn.tfs.prefs.PrefSpec
-import eu.hxreborn.tfs.prefs.PrefsRepository
+import io.github.libxposed.service.XposedService
+import io.github.libxposed.service.XposedServiceHelper
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 class SettingsViewModelImpl(
-    private val repository: PrefsRepository,
-) : SettingsViewModel() {
+    application: Application,
+) : SettingsViewModel(application) {
+    private val app = App.from(application)
+
+    @Volatile
+    private var mService: XposedService? = null
+
     override val uiState: StateFlow<AppPrefs> =
-        repository.state.stateIn(
+        app.prefs.state.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = AppPrefs(),
         )
 
-    private val _pendingReboot = MutableStateFlow(false)
-    override val pendingReboot: StateFlow<Boolean> = _pendingReboot.asStateFlow()
+    private val _xposedServiceAvailable = MutableStateFlow(false)
+    override val xposedServiceAvailable: StateFlow<Boolean> =
+        _xposedServiceAvailable.asStateFlow()
 
-    private val _xposedActive = MutableStateFlow(false)
-    override val xposedActive: StateFlow<Boolean> = _xposedActive.asStateFlow()
+    private val serviceListener =
+        object : XposedServiceHelper.OnServiceListener {
+            override fun onServiceBind(service: XposedService) {
+                onServiceBound(service)
+            }
 
-    override fun setXposedActive(active: Boolean) {
-        _xposedActive.value = active
+            override fun onServiceDied(service: XposedService) {
+                onServiceDied()
+            }
+        }
+
+    init {
+        app.addServiceListener(serviceListener)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        app.removeServiceListener(serviceListener)
+    }
+
+    override fun onServiceBound(service: XposedService) {
+        mService = service
+        _xposedServiceAvailable.value = true
+    }
+
+    override fun onServiceDied() {
+        mService = null
+        _xposedServiceAvailable.value = false
     }
 
     override fun <T : Any> savePref(
         pref: PrefSpec<T>,
         value: T,
     ) {
-        repository.save(pref, value)
-        _pendingReboot.value = true
+        app.prefs.save(pref, value)
     }
 
     override fun resetToDefaults() {
-        repository.resetAll()
-        _pendingReboot.value = true
+        app.prefs.resetAll()
     }
 
     override fun restoreState(state: AppPrefs) {
-        repository.restoreState(state)
-        _pendingReboot.value = true
+        app.prefs.restoreState(state)
     }
-}
 
-class SettingsViewModelFactory(
-    private val repository: PrefsRepository,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        require(modelClass.isAssignableFrom(SettingsViewModelImpl::class.java))
-        return SettingsViewModelImpl(repository) as T
+    override fun triggerHotReload(onStatus: (String) -> Unit) {
+        if (!BuildConfig.DEBUG) return
+
+        fun report(message: String) {
+            viewModelScope.launch(Dispatchers.Main) { onStatus(message) }
+        }
+
+        val service = mService
+        if (service == null) {
+            report("hot reload: service not bound")
+            return
+        }
+        if (service.apiVersion < XposedService.API_102) {
+            report("hot reload needs api 102, framework is ${service.apiVersion}")
+            return
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                val targets = service.getRunningTargets()
+                if (targets.isEmpty()) {
+                    report("hot reload: no running targets")
+                    return@runCatching
+                }
+                targets.forEach { target ->
+                    service.hotReloadModule(target, null) { reloaded, result ->
+                        report("hot reload ${reloaded.processName}: ${result.status()}")
+                    }
+                }
+            }.onFailure { report("hot reload failed: ${it.message}") }
+        }
+    }
+
+    companion object {
+        val Factory =
+            viewModelFactory {
+                initializer<SettingsViewModel> {
+                    SettingsViewModelImpl(
+                        this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as Application,
+                    )
+                }
+            }
     }
 }
