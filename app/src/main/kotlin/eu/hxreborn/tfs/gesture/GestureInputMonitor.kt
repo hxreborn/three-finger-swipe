@@ -2,38 +2,41 @@ package eu.hxreborn.tfs.gesture
 
 import android.os.Looper
 import android.view.Choreographer
-import eu.hxreborn.tfs.gesture.GestureInputMonitor.pilferPointers
-import eu.hxreborn.tfs.util.log
+import eu.hxreborn.tfs.util.Logger
+import eu.hxreborn.tfs.util.anyClassFromNames
+import java.lang.reflect.Method
 
-/**
- * Reflection-based [android.view.InputMonitor] for pointer pilfering.
- *
- * When three fingers land, [pilferPointers] tells InputDispatcher to cancel
- * touch delivery to the foreground app, preventing scrolling and pull-down
- * during the gesture.
- */
+// pilferPointers tells InputDispatcher to cancel touch delivery to the foreground app
 internal object GestureInputMonitor {
     private var inputMonitor: Any? = null
 
-    // prevent GC of BatchedInputEventReceiver, which would close the input channel
-    @Suppress("unused")
+    // InputEventReceiver closes its input channel once unreachable
     private var eventDrain: Any? = null
+    private var pilferMethod: Method? = null
+    private var monitorDisposeMethod: Method? = null
+    private var drainDisposeMethod: Method? = null
 
-    fun create(): Boolean =
-        runCatching {
-            val imgClass = Class.forName("android.hardware.input.InputManagerGlobal")
-            val img = imgClass.getMethod("getInstance").invoke(null)
+    fun create(): Boolean {
+        dispose()
+        return runCatching {
+            // InputManagerGlobal exists only from A14
+            val inputManagerClass =
+                javaClass.classLoader!!.anyClassFromNames(
+                    "android.hardware.input.InputManagerGlobal",
+                    "android.hardware.input.InputManager",
+                )
+            val inputManager = inputManagerClass.getMethod("getInstance").invoke(null)
             val monitor =
-                imgClass
+                inputManagerClass
                     .getMethod(
                         "monitorGestureInput",
                         String::class.java,
                         Int::class.javaPrimitiveType,
-                    ).invoke(img, "tfs-gesture", 0)!!
+                    ).invoke(inputManager, "tfs-gesture", 0)!!
             val channel = monitor.javaClass.getMethod("getInputChannel").invoke(monitor)
             val channelClass = Class.forName("android.view.InputChannel")
             val receiverClass = Class.forName("android.view.BatchedInputEventReceiver")
-            eventDrain =
+            val drain =
                 receiverClass
                     .getDeclaredConstructor(
                         channelClass,
@@ -41,19 +44,45 @@ internal object GestureInputMonitor {
                         Choreographer::class.java,
                     ).newInstance(channel, Looper.getMainLooper(), Choreographer.getInstance())
             inputMonitor = monitor
-            log("GestureInputMonitor created")
+            eventDrain = drain
+            pilferMethod = monitor.javaClass.getMethod("pilferPointers")
+            monitorDisposeMethod = monitor.javaClass.getMethod("dispose")
+            drainDisposeMethod = drain.javaClass.getMethod("dispose")
+            Logger.info("input monitor created source=${inputManagerClass.simpleName}")
             true
         }.onFailure {
-            log("GestureInputMonitor creation failed (pilfer unavailable)", it)
+            dispose()
+            Logger.warn("pilfer unavailable reason=monitor-create-failed", it)
         }.getOrDefault(false)
+    }
 
     fun pilferPointers() {
         val monitor = inputMonitor ?: return
-        runCatching {
-            monitor.javaClass.getMethod("pilferPointers").invoke(monitor)
-            log("Pointers pilfered")
-        }.onFailure {
-            log("pilferPointers failed", it)
+        val pilfer =
+            pilferMethod ?: run {
+                Logger.warn("pilfer skipped reason=no-method")
+                return
+            }
+        runCatching { pilfer.invoke(monitor) }
+            .onSuccess { Logger.debug { "pointers pilfered" } }
+            .onFailure { Logger.warn("pointer pilfer failed", it) }
+    }
+
+    fun dispose() {
+        eventDrain?.let { drain ->
+            runCatching {
+                (drainDisposeMethod ?: drain.javaClass.getMethod("dispose")).invoke(drain)
+            }.onFailure { Logger.warn("input receiver dispose failed", it) }
         }
+        inputMonitor?.let { monitor ->
+            runCatching {
+                (monitorDisposeMethod ?: monitor.javaClass.getMethod("dispose")).invoke(monitor)
+            }.onFailure { Logger.warn("input monitor dispose failed", it) }
+        }
+        eventDrain = null
+        inputMonitor = null
+        pilferMethod = null
+        monitorDisposeMethod = null
+        drainDisposeMethod = null
     }
 }

@@ -2,19 +2,26 @@ package eu.hxreborn.tfs.xposed.hook
 
 import android.content.Context
 import android.os.Handler
+import android.os.Looper
 import eu.hxreborn.tfs.action.screenshot.ScreenshotActionResolver
 import eu.hxreborn.tfs.action.screenshot.ScreenshotDispatch
 import eu.hxreborn.tfs.prefs.CaptureMode
+import eu.hxreborn.tfs.util.Logger
 import eu.hxreborn.tfs.util.findMethodUpward
-import eu.hxreborn.tfs.util.log
-import eu.hxreborn.tfs.util.logDebug
+import eu.hxreborn.tfs.util.findMethodUpwardOrWidest
 import eu.hxreborn.tfs.util.readField
+import eu.hxreborn.tfs.util.signature
 import java.lang.reflect.Method
+
+private const val REGISTER = "registerPointerEventListener"
+private const val UNREGISTER = "unregisterPointerEventListener"
 
 internal data class PhoneWindowManagerBindings(
     val systemContext: Context,
+    val handler: Handler,
     val pointerListenerClass: Class<*>,
     val pointerRegistration: PointerRegistration,
+    val pointerUnregistration: PointerRegistration?,
     val screenshotDispatch: ScreenshotDispatch?,
 ) {
     companion object {
@@ -32,26 +39,35 @@ internal data class PhoneWindowManagerBindings(
                 phoneWindowManager.readField("mContext") as? Context
                     ?: error("PhoneWindowManager.mContext is unavailable")
 
+            val displayPolicy =
+                phoneWindowManager.readField("mDefaultDisplayPolicy") ?: phoneWindowManager
+            val handler =
+                displayPolicy.readField("mHandler") as? Handler
+                    ?: Handler(Looper.getMainLooper()).also {
+                        Logger.warn("policy handler absent reason=no-field fallback=main-looper")
+                    }
+
             val pointerRegistration =
                 phoneWindowManager.resolvePointerRegistration(pointerListenerClass)
                     ?: error("registerPointerEventListener is unavailable")
+            Logger.info("resolved ${pointerRegistration.method.signature()}")
 
-            val displayPolicy =
-                phoneWindowManager.readField("mDefaultDisplayPolicy") ?: phoneWindowManager
+            val pointerUnregistration =
+                pointerRegistration.target.findPointerMethod(UNREGISTER, pointerListenerClass)
+            when (pointerUnregistration) {
+                null -> Logger.warn("optional member absent $UNREGISTER reason=no-method")
+                else -> Logger.info("resolved ${pointerUnregistration.method.signature()}")
+            }
+
             val screenshotDispatch =
-                (displayPolicy.readField("mHandler") as? Handler)?.let {
-                    ScreenshotActionResolver.resolve(phoneWindowManager, it, captureMode)
-                } ?: run {
-                    log(
-                        "PhoneWindowManagerBindings: mHandler unavailable, screenshot dispatch disabled",
-                    )
-                    null
-                }
+                ScreenshotActionResolver.resolve(phoneWindowManager, handler, captureMode)
 
             return PhoneWindowManagerBindings(
                 systemContext = systemContext,
+                handler = handler,
                 pointerListenerClass = pointerListenerClass,
                 pointerRegistration = pointerRegistration,
+                pointerUnregistration = pointerUnregistration,
                 screenshotDispatch = screenshotDispatch,
             )
         }
@@ -59,47 +75,29 @@ internal data class PhoneWindowManagerBindings(
         private fun Any.resolvePointerRegistration(
             pointerListenerClass: Class<*>,
         ): PointerRegistration? {
-            // Try DisplayContent first, fall back to WindowManagerFuncs
-            val displayContent =
-                readField("mDefaultDisplayPolicy")?.readField("mDisplayContent").also {
-                    if (it == null) {
-                        logDebug {
-                            "mDisplayContent unavailable, falling back to mWindowManagerFuncs"
-                        }
-                    }
-                }
-
-            displayContent?.findPointerRegistration(pointerListenerClass)?.let { return it }
-
-            val windowManagerFuncs = readField("mWindowManagerFuncs") ?: return null
-            return windowManagerFuncs.findPointerRegistration(pointerListenerClass)
-        }
-
-        private fun Any.findPointerRegistration(
-            pointerListenerClass: Class<*>,
-        ): PointerRegistration? {
-            javaClass
-                .findMethodUpward(
-                    "registerPointerEventListener",
-                    pointerListenerClass,
-                    Int::class.javaPrimitiveType!!,
-                )?.let {
-                    return PointerRegistration(
-                        target = this,
-                        method = it,
-                        usesDisplayId = true,
-                    )
-                }
-
-            javaClass.findMethodUpward("registerPointerEventListener", pointerListenerClass)?.let {
-                return PointerRegistration(
-                    target = this,
-                    method = it,
-                    usesDisplayId = false,
-                )
+            // DisplayContent first with WindowManagerFuncs as fallback
+            val displayContent = readField("mDefaultDisplayPolicy")?.readField("mDisplayContent")
+            if (displayContent == null) {
+                Logger.debug { "pointer registration fallback reason=no-display-content" }
             }
 
-            return null
+            displayContent?.findPointerMethod(REGISTER, pointerListenerClass)?.let { return it }
+
+            val windowManagerFuncs = readField("mWindowManagerFuncs") ?: return null
+            return windowManagerFuncs.findPointerMethod(REGISTER, pointerListenerClass)
+        }
+
+        private fun Any.findPointerMethod(
+            name: String,
+            pointerListenerClass: Class<*>,
+        ): PointerRegistration? {
+            val method =
+                javaClass.findMethodUpward(
+                    name,
+                    pointerListenerClass,
+                    Int::class.javaPrimitiveType!!,
+                ) ?: javaClass.findMethodUpwardOrWidest(name, pointerListenerClass) ?: return null
+            return PointerRegistration(target = this, method = method)
         }
     }
 }
@@ -107,11 +105,11 @@ internal data class PhoneWindowManagerBindings(
 internal data class PointerRegistration(
     val target: Any,
     val method: Method,
-    val usesDisplayId: Boolean,
 ) {
+    // every int arg is the default display id
     fun invoke(listener: Any): Any? =
-        when {
-            usesDisplayId -> method.invoke(target, listener, 0)
-            else -> method.invoke(target, listener)
-        }
+        method.invoke(
+            target,
+            *method.parameterTypes.map { if (it.isPrimitive) 0 else listener }.toTypedArray(),
+        )
 }
