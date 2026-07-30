@@ -15,23 +15,16 @@ sealed class PrefSpec<T : Any>(
 
     fun reset(editor: SharedPreferences.Editor) = write(editor, default)
 
-    fun copyTo(
+    // an unchanged key must not fire the cross-process listener
+    fun copyIfChanged(
         from: SharedPreferences,
-        to: SharedPreferences.Editor,
-    ) = write(to, read(from))
-}
-
-class BoolPref(
-    key: String,
-    default: Boolean,
-) : PrefSpec<Boolean>(key, default) {
-    override fun read(prefs: SharedPreferences): Boolean = prefs.getBoolean(key, default)
-
-    override fun write(
+        to: SharedPreferences,
         editor: SharedPreferences.Editor,
-        value: Boolean,
-    ) {
-        editor.putBoolean(key, value)
+    ): Boolean {
+        val value = read(from)
+        if (read(to) == value) return false
+        write(editor, value)
+        return true
     }
 }
 

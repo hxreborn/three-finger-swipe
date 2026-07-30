@@ -1,24 +1,18 @@
 package eu.hxreborn.tfs.prefs
 
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.core.content.edit
 import eu.hxreborn.tfs.action.ActionId
-import eu.hxreborn.tfs.util.log
+import eu.hxreborn.tfs.util.Logger
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
 class PrefsRepository(
-    private val localPrefs: SharedPreferences,
+    private val local: SharedPreferences,
+    private val remoteProvider: () -> SharedPreferences? = { null },
 ) {
-    @Volatile
-    private var remotePrefs: SharedPreferences? = null
-
-    fun attachRemotePrefs(prefs: SharedPreferences?) {
-        remotePrefs = prefs
-        prefs?.let { syncLocalToRemote() }
-    }
-
     val state: Flow<AppPrefs> =
         callbackFlow {
             fun sendState() = trySend(readState())
@@ -30,76 +24,63 @@ class PrefsRepository(
                     ->
                     sendState()
                 }
-            localPrefs.registerOnSharedPreferenceChangeListener(listener)
-            awaitClose { localPrefs.unregisterOnSharedPreferenceChangeListener(listener) }
+            local.registerOnSharedPreferenceChangeListener(listener)
+            awaitClose { local.unregisterOnSharedPreferenceChangeListener(listener) }
         }
 
     fun <T : Any> save(
         pref: PrefSpec<T>,
         value: T,
     ) {
-        localPrefs.edit { pref.write(this, value) }
+        local.edit { pref.write(this, value) }
         pushToRemote { pref.write(this, value) }
     }
 
     fun resetAll() {
-        localPrefs.edit { Prefs.all.forEach { it.reset(this) } }
+        local.edit { Prefs.all.forEach { it.reset(this) } }
         pushToRemote { Prefs.all.forEach { it.reset(this) } }
     }
 
     fun restoreState(state: AppPrefs) {
-        localPrefs.edit {
-            Prefs.DEBUG_LOGS.write(this, state.debugLogs)
-            Prefs.SWIPE_THRESHOLD_PCT.write(this, state.swipeThresholdPct)
-            Prefs.EDGE_EXCLUSION_DP.write(this, state.edgeExclusionDp)
-            Prefs.FINGER_LANDING_MS.write(this, state.fingerLandingMs)
-            Prefs.COOLDOWN_MS.write(this, state.cooldownMs)
-            Prefs.CAPTURE_MODE.write(this, state.captureMode.key)
-            Prefs.SELECTED_ACTION.write(this, state.selectedAction.key)
-        }
-        pushToRemote {
-            Prefs.DEBUG_LOGS.write(this, state.debugLogs)
-            Prefs.SWIPE_THRESHOLD_PCT.write(this, state.swipeThresholdPct)
-            Prefs.EDGE_EXCLUSION_DP.write(this, state.edgeExclusionDp)
-            Prefs.FINGER_LANDING_MS.write(this, state.fingerLandingMs)
-            Prefs.COOLDOWN_MS.write(this, state.cooldownMs)
-            Prefs.CAPTURE_MODE.write(this, state.captureMode.key)
-            Prefs.SELECTED_ACTION.write(this, state.selectedAction.key)
-        }
+        local.edit { writeState(state) }
+        pushToRemote { writeState(state) }
+    }
+
+    private fun SharedPreferences.Editor.writeState(state: AppPrefs) {
+        Prefs.SWIPE_THRESHOLD_PCT.write(this, state.swipeThresholdPct)
+        Prefs.EDGE_EXCLUSION_DP.write(this, state.edgeExclusionDp)
+        Prefs.FINGER_LANDING_MS.write(this, state.fingerLandingMs)
+        Prefs.COOLDOWN_MS.write(this, state.cooldownMs)
+        Prefs.CAPTURE_MODE.write(this, state.captureMode.key)
+        Prefs.SELECTED_ACTION.write(this, state.selectedAction.key)
+    }
+
+    fun syncToRemote() {
+        val remote = remoteProvider() ?: return
+        runCatching {
+            remote.edit { Prefs.all.forEach { it.copyIfChanged(local, remote, this) } }
+        }.onFailure { Log.w(Logger.TAG, "remote prefs sync failed reason=${it.message}", it) }
     }
 
     private fun pushToRemote(block: SharedPreferences.Editor.() -> Unit) {
-        remotePrefs?.let { remote ->
-            runCatching { remote.edit(action = block) }.onFailure {
-                log(
-                    "Failed to push remote prefs",
-                    it,
-                )
-            }
+        val remote = remoteProvider() ?: return
+        runCatching { remote.edit(action = block) }.onFailure {
+            Log.w(Logger.TAG, "remote prefs push failed reason=${it.message}", it)
         }
-    }
-
-    private fun syncLocalToRemote() {
-        val remote = remotePrefs ?: return
-        runCatching {
-            remote.edit { Prefs.all.forEach { it.copyTo(localPrefs, this) } }
-        }.onFailure { log("Failed to sync local prefs to remote", it) }
     }
 
     private fun readState() =
         AppPrefs(
-            debugLogs = Prefs.DEBUG_LOGS.read(localPrefs),
-            swipeThresholdPct = Prefs.SWIPE_THRESHOLD_PCT.read(localPrefs),
-            edgeExclusionDp = Prefs.EDGE_EXCLUSION_DP.read(localPrefs),
-            fingerLandingMs = Prefs.FINGER_LANDING_MS.read(localPrefs),
-            cooldownMs = Prefs.COOLDOWN_MS.read(localPrefs),
-            captureMode = CaptureMode.fromKey(Prefs.CAPTURE_MODE.read(localPrefs)),
-            selectedAction = ActionId.fromKey(Prefs.SELECTED_ACTION.read(localPrefs)),
+            swipeThresholdPct = Prefs.SWIPE_THRESHOLD_PCT.read(local),
+            edgeExclusionDp = Prefs.EDGE_EXCLUSION_DP.read(local),
+            fingerLandingMs = Prefs.FINGER_LANDING_MS.read(local),
+            cooldownMs = Prefs.COOLDOWN_MS.read(local),
+            captureMode = CaptureMode.fromKey(Prefs.CAPTURE_MODE.read(local)),
+            selectedAction = ActionId.fromKey(Prefs.SELECTED_ACTION.read(local)),
         )
 }
 
 data class AppPrefs(
-    val debugLogs: Boolean = Prefs.DEBUG_LOGS.default,
     val swipeThresholdPct: Int = Prefs.SWIPE_THRESHOLD_PCT.default,
     val edgeExclusionDp: Int = Prefs.EDGE_EXCLUSION_DP.default,
     val fingerLandingMs: Int = Prefs.FINGER_LANDING_MS.default,
