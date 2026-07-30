@@ -1,16 +1,6 @@
 import com.android.build.api.artifact.ArtifactTransformationRequest
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.BuiltArtifact
-import org.gradle.api.DefaultTask
-import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.TaskAction
 
 plugins {
     alias(libs.plugins.android.application)
@@ -19,7 +9,64 @@ plugins {
     alias(libs.plugins.aboutlibraries)
 }
 
-// Renames the APK output file for a variant using the Artifacts transform API (AGP 9+).
+val cfgModuleId: String = providers.gradleProperty("module.id").get()
+val cfgModuleName: String = providers.gradleProperty("module.name").get()
+val cfgModuleAuthor: String = providers.gradleProperty("module.author").get()
+val cfgModuleDescription: String = providers.gradleProperty("module.description").get()
+val cfgXposedApiMin: Int = providers.gradleProperty("xposed.api.min").get().toInt()
+val cfgXposedApiTarget: Int = providers.gradleProperty("xposed.api.target").get().toInt()
+
+abstract class GenerateXposedModuleProp : DefaultTask() {
+    @get:Input
+    abstract val moduleId: Property<String>
+
+    @get:Input
+    abstract val moduleName: Property<String>
+
+    @get:Input
+    abstract val moduleAuthor: Property<String>
+
+    @get:Input
+    abstract val moduleDescription: Property<String>
+
+    @get:Input
+    abstract val moduleVersionName: Property<String>
+
+    @get:Input
+    abstract val moduleVersionCode: Property<Int>
+
+    @get:Input
+    abstract val moduleMinApiVersion: Property<Int>
+
+    @get:Input
+    abstract val moduleTargetApiVersion: Property<Int>
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun run() {
+        val xposedDir = outputDir.get().file("META-INF/xposed").asFile
+        xposedDir.mkdirs()
+        xposedDir.resolve("module.prop").writeText(
+            """
+            id=${moduleId.get()}
+            name=${moduleName.get()}
+            version=${moduleVersionName.get()}
+            versionCode=${moduleVersionCode.get()}
+            author=${moduleAuthor.get()}
+            description=${moduleDescription.get()}
+            minApiVersion=${moduleMinApiVersion.get()}
+            targetApiVersion=${moduleTargetApiVersion.get()}
+            staticScope=true
+            exceptionMode=protective
+            autoHotReload=true
+            """.trimIndent() + "\n",
+        )
+        xposedDir.resolve("scope.list").writeText("system\n")
+    }
+}
+
 abstract class RenameApkTask : DefaultTask() {
     @get:Internal
     abstract val transformRequest: Property<ArtifactTransformationRequest<RenameApkTask>>
@@ -46,8 +93,8 @@ abstract class RenameApkTask : DefaultTask() {
 
 android {
     namespace = "eu.hxreborn.tfs"
-    compileSdk = 36
-    buildToolsVersion = "36.0.0"
+    compileSdk = 37
+    buildToolsVersion = "37.0.0"
 
     defaultConfig {
         applicationId = "eu.hxreborn.tfs"
@@ -113,7 +160,7 @@ android {
 
     packaging {
         resources {
-            pickFirsts += "META-INF/xposed/*"
+            merges += "META-INF/xposed/**"
             excludes += "META-INF/LICENSE*"
         }
     }
@@ -179,12 +226,27 @@ android.sourceSets["main"]
     .res.directories
     .add("build/generated/aboutLibrariesRes")
 
+val generateXposedModuleProp by tasks.registering(GenerateXposedModuleProp::class) {
+    moduleId.set(cfgModuleId)
+    moduleName.set(cfgModuleName)
+    moduleAuthor.set(cfgModuleAuthor)
+    moduleDescription.set(cfgModuleDescription)
+    moduleVersionName.set(android.defaultConfig.versionName ?: "unknown")
+    moduleVersionCode.set(android.defaultConfig.versionCode ?: 0)
+    moduleMinApiVersion.set(cfgXposedApiMin)
+    moduleTargetApiVersion.set(cfgXposedApiTarget)
+}
+
 androidComponents {
     onVariants { variant ->
+        variant.sources.resources?.addGeneratedSourceDirectory(
+            generateXposedModuleProp,
+            GenerateXposedModuleProp::outputDir,
+        )
+
         val versionName = android.defaultConfig.versionName ?: "unknown"
         val variantTaskSuffix = variant.name.replaceFirstChar { it.uppercaseChar() }
 
-        // Rename APK output (AGP 9+ Artifacts transform API)
         val renameTask =
             tasks.register("renameApk$variantTaskSuffix", RenameApkTask::class.java) {
                 apkName.set("tfs-v$versionName-${variant.name}.apk")
