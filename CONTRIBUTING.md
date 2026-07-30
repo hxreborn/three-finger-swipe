@@ -12,14 +12,15 @@ Requires JDK 21 (Temurin). See `gradle/libs.versions.toml` for all dependency ve
 
 ## Code style
 
-KtLint runs automatically on every build (`preBuild` depends on `ktlintCheck`). Fix violations
-before committing:
+KtLint is wired into `check`, so a plain `assembleDebug` won't run it. Fix violations before
+committing:
 
 ```bash
-./gradlew ktlintFormat
+./gradlew :app:ktlintCheck
+./gradlew :app:ktlintFormat
 ```
 
-Rules are defined in `.editorconfig`. Key settings: 100 char line limit for Kotlin, 140 for Compose
+Rules live in `.editorconfig`. Key settings: 100 char line limit for Kotlin, 140 for Compose
 UI files, trailing commas allowed.
 
 ## Commits
@@ -31,9 +32,9 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/):
 ```
 
 Types: `feat`, `fix`, `refactor`, `perf`, `test`, `build`, `ci`, `docs`, `style`, `chore`
-Scopes: `hooks`, `ui`, `module`, `gradle`, `ci`, `prefs`, `view`, `theme`
+Scopes: `hook`, `gesture`, `action`, `prefs`, `module`, `ui`, `build`, `ci`
 
-Subject line in imperative mood, max 50 chars, no period. Body uses bullet lines only if needed.
+Subject line in imperative mood, ≤72 chars (hard limit 100), no period. Body uses bullet lines only if needed.
 
 ## Pull requests
 

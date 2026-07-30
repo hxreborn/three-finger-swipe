@@ -1,36 +1,39 @@
-# Three Finger Swipe
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hxreborn/three-finger-swipe/main/.github/assets/3fs_white.svg">
+    <img src="https://raw.githubusercontent.com/hxreborn/three-finger-swipe/main/.github/assets/3fs_black.svg" width="96" alt="">
+  </picture>
+  <br>
+  Three Finger Swipe
+</h1>
 
-Standalone implementation of three-finger swipe screenshots using the modern LSPosed API
 <p align="center">
-  <a href="https://developer.android.com"><img src="https://img.shields.io/badge/Android-9%E2%80%9316-3DDC84?style=flat&logo=android&logoColor=white" alt="Android 9-16" /></a>
-  <img src="https://img.shields.io/badge/LSPosed_API-101-8F00FF?style=flat" alt="LSPosed API 101" />
-  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fhxreborn%2Fthree-finger-swipe%2Fmain%2Fgradle%2Flibs.versions.toml&query=%24.versions.kotlin&label=Kotlin&color=7F52FF&style=flat&logo=kotlin&logoColor=white" alt="Kotlin" /></a>
-  <a href="https://developer.android.com/compose"><img src="https://img.shields.io/badge/Compose-Material_3_Expressive-4285F4?style=flat&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose" /></a>
-  <a href="https://gradle.org"><img src="https://img.shields.io/badge/Gradle-9.4.0-02303A?style=flat&logo=gradle&logoColor=white" alt="Gradle" /></a>
-  <a href="https://developer.android.com/build"><img src="https://img.shields.io/badge/AGP-9.1.0-02303A?style=flat&logo=android&logoColor=white" alt="AGP" /></a>
+  Xposed module that adds a configurable three-finger swipe-down gesture for screenshots and system actions.
 </p>
 
 <p align="center">
-  <a href="https://github.com/hxreborn/three-finger-swipe/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/hxreborn/three-finger-swipe/build.yml?label=build&style=flat&logo=githubactions&logoColor=white" alt="Build" /></a>
-  <a href="https://github.com/hxreborn/three-finger-swipe/releases/latest"><img src="https://img.shields.io/github/v/release/hxreborn/three-finger-swipe?style=flat&logo=github" alt="Release" /></a>
-  <a href="https://github.com/hxreborn/three-finger-swipe/releases"><img src="https://img.shields.io/github/downloads/hxreborn/three-finger-swipe/total?style=flat&logo=github" alt="Downloads" /></a>
-  <a href="https://github.com/Xposed-Modules-Repo/eu.hxreborn.tfs/releases"><img src="https://img.shields.io/github/downloads/Xposed-Modules-Repo/eu.hxreborn.tfs/total?style=flat&label=Xposed%20Repo&logo=android" alt="Xposed Repo Downloads" /></a>
-  <a href="https://github.com/hxreborn/three-finger-swipe/blob/main/LICENSE"><img src="https://img.shields.io/github/license/hxreborn/three-finger-swipe?style=flat&logo=gnu" alt="License" /></a>
+  <img src="https://img.shields.io/badge/Android-9%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android 9+">
+  <img src="https://img.shields.io/badge/libxposed-API_101%2B-ff69b4?style=for-the-badge" alt="libxposed API 101+">
 </p>
 
 ## Features
 
-- Three-finger swipe down to take a screenshot (or trigger other actions)
-- Single-purpose module with one hook on System Framework
-- Compatible with [CaptureSposed](https://github.com/99keshav99/CaptureSposed) and [DisableFlagSecure](https://github.com/Xposed-Modules-Repo/io.github.lsposed.disableflagsecure)
-- Settings UI built with Jetpack Compose and Material 3 Expressive
-- Built on LSPosed API 101
-- Free and open source (GPLv3)
+- Selectable actions:
+    - Take a screenshot
+    - Turn the screen off
+    - Toggle the flashlight
+    - Change the ringer mode
+    - Toggle split screen
+- Adjustable swipe distance and edge exclusion
+- Configurable finger landing window and trigger cooldown
+- System API and SYSRQ screenshot methods for ROM compatibility
+
+Changes apply immediately except the screenshot method, which requires a reboot.
 
 ## Requirements
 
-- Android 9 through 16 (API 28-36)
-- An LSPosed Manager version with API 101 support (required for now)
+- Android 9 through 16 (API 28–36)
+- Xposed framework with libxposed API 101+ support, such as LSPosed or Vector
 
 ## Installation
 
@@ -39,15 +42,17 @@ Standalone implementation of three-finger swipe screenshots using the modern LSP
     <a href="../../releases"><img src="https://github.com/user-attachments/assets/d18f850c-e4d2-4e00-8b03-3b0e87e90954" height="45" alt="Get it on GitHub" /></a>
     <a href="http://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22eu.hxreborn.tfs%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fhxreborn%2Fthree-finger-swipe%22%2C%22author%22%3A%22rafareborn%22%2C%22name%22%3A%22Three%20Finger%20Swipe%22%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Afalse%7D%22%7D"><img src="https://github.com/user-attachments/assets/dffe8fb9-c0d1-470b-8d69-6d5b38a8aa2d" height="45" alt="Get it on Obtainium" /></a>
 
-2. Enable the module in LSPosed and scope it to `system`
+2. Enable the module in your Xposed manager and scope it to System Framework (`system`)
 3. Reboot your device
-4. Open the app to configure gesture settings
+4. Open the app to configure the gesture
 
 ## FAQ
 
 #### Why does this not conflict with CaptureSposed or DisableFlagSecure?
 
-This module only hooks `PhoneWindowManager` in `system_server`. CaptureSposed and DisableFlagSecure work through different code paths, so you keep their secure-window bypass behavior while using this module's three-finger gesture to trigger the screenshot.
+This module only hooks `PhoneWindowManager` in `system_server`. CaptureSposed and DisableFlagSecure
+use different code paths, so their secure-window bypass behavior continues to work with this
+module's screenshot gesture.
 
 ## Build
 
@@ -77,11 +82,11 @@ Then build with `./gradlew :app:assembleRelease`.
 
 ## Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
 For bugs or feature requests, [open an issue](https://github.com/hxreborn/three-finger-swipe/issues/new/choose).
 
 ## License
 
 <a href="LICENSE"><img src="https://github.com/user-attachments/assets/b211cf0d-e255-421c-9213-6b6258676013" height="90" alt="GPLv3"></a>
 
-This project is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU General Public License v3.0. See [LICENSE](LICENSE) for details.
