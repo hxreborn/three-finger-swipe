@@ -1,10 +1,15 @@
 package eu.hxreborn.tfs.gesture
 
+import android.os.Handler
 import android.os.Looper
 import android.view.Choreographer
 import eu.hxreborn.tfs.util.Logger
 import eu.hxreborn.tfs.util.anyClassFromNames
 import java.lang.reflect.Method
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+
+private const val DISPOSE_TIMEOUT_MS = 2000L
 
 // pilferPointers tells InputDispatcher to cancel touch delivery to the foreground app
 internal object GestureInputMonitor {
@@ -68,7 +73,40 @@ internal object GestureInputMonitor {
             .onFailure { Logger.warn("pointer pilfer failed", it) }
     }
 
+    // InputEventReceiver.dispose asserts its own Looper and hot reload retires us off a Binder thread
     fun dispose() {
+        val main = Looper.getMainLooper()
+        if (Looper.myLooper() == main) {
+            disposeOnMain()
+            return
+        }
+        val done = CountDownLatch(1)
+        val posted =
+            Handler(main).post {
+                try {
+                    disposeOnMain()
+                } finally {
+                    done.countDown()
+                }
+            }
+        if (!posted) {
+            Logger.warn("input monitor dispose skipped reason=main-handler-rejected")
+            return
+        }
+        val finished =
+            try {
+                done.await(DISPOSE_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+                Logger.warn("input monitor dispose unfinished reason=interrupted", e)
+                return
+            }
+        if (!finished) {
+            Logger.warn("input monitor dispose unfinished reason=await-timeout")
+        }
+    }
+
+    private fun disposeOnMain() {
         eventDrain?.let { drain ->
             runCatching {
                 (drainDisposeMethod ?: drain.javaClass.getMethod("dispose")).invoke(drain)
