@@ -52,6 +52,7 @@ class PrefsRepository(
         Prefs.FINGER_LANDING_MS.write(this, state.fingerLandingMs)
         Prefs.COOLDOWN_MS.write(this, state.cooldownMs)
         Prefs.CAPTURE_MODE.write(this, state.captureMode.key)
+        Prefs.SPLIT_METHOD.write(this, state.splitMethod.key)
         Prefs.SELECTED_ACTION.write(this, state.selectedAction.key)
     }
 
@@ -76,6 +77,7 @@ class PrefsRepository(
             fingerLandingMs = Prefs.FINGER_LANDING_MS.read(local),
             cooldownMs = Prefs.COOLDOWN_MS.read(local),
             captureMode = CaptureMode.fromKey(Prefs.CAPTURE_MODE.read(local)),
+            splitMethod = SplitMethod.fromKey(Prefs.SPLIT_METHOD.read(local)),
             selectedAction = ActionId.fromKey(Prefs.SELECTED_ACTION.read(local)),
         )
 }
@@ -86,5 +88,6 @@ data class AppPrefs(
     val fingerLandingMs: Int = Prefs.FINGER_LANDING_MS.default,
     val cooldownMs: Int = Prefs.COOLDOWN_MS.default,
     val captureMode: CaptureMode = CaptureMode.SYSTEM_API,
+    val splitMethod: SplitMethod = SplitMethod.NATIVE,
     val selectedAction: ActionId = ActionId.SCREENSHOT,
 )

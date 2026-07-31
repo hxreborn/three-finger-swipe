@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.view.Display
 import eu.hxreborn.tfs.action.Action
+import eu.hxreborn.tfs.prefs.SplitMethod
 import eu.hxreborn.tfs.util.Logger
 import eu.hxreborn.tfs.util.findMethodUpward
 import eu.hxreborn.tfs.util.signature
@@ -16,6 +17,7 @@ private const val ACTIVITY_TYPE_STANDARD = 1
 class ToggleSplitScreenAction(
     private val context: Context,
     classLoader: ClassLoader?,
+    private val method: () -> SplitMethod,
 ) : Action {
     private val statusBar: Any?
     private val enterSplit: Method?
@@ -93,11 +95,30 @@ class ToggleSplitScreenAction(
     override fun execute() {
         val task = focusedTask()
         val split = task != null && isSplit(task)
-        if (shellRoute?.resolved == true && task != null && shellSafe(task, split)) {
+        if (method() == SplitMethod.WM_SHELL &&
+            shellRoute?.resolved == true &&
+            task != null &&
+            shellSafe(task, split)
+        ) {
             shellRoute.dispatch(task.taskId, split) { dispatchDirect(task, split) }
             return
         }
         dispatchDirect(task, split)
+    }
+
+    // moveToStage throws on the shell thread for a task WMShell does not own or already split
+    private fun shellSafe(
+        task: ActivityManager.RunningTaskInfo,
+        split: Boolean,
+    ): Boolean {
+        val type = intOf(activityType, task)
+        val mode = intOf(windowingMode, task)
+        val wanted = if (split) WINDOWING_MODE_MULTI_WINDOW else WINDOWING_MODE_FULLSCREEN
+        val safe = type == ACTIVITY_TYPE_STANDARD && mode == wanted
+        if (!safe) {
+            Logger.info("split screen shell skipped task=${task.taskId} type=$type mode=$mode")
+        }
+        return safe
     }
 
     private fun dispatchDirect(
@@ -142,21 +163,6 @@ class ToggleSplitScreenAction(
         }.onFailure {
             Logger.error("split screen toggle failed task=${task?.taskId} split=$split", it)
         }
-    }
-
-    // moveToStage throws on the shell thread for a task WMShell does not own or already split
-    private fun shellSafe(
-        task: ActivityManager.RunningTaskInfo,
-        split: Boolean,
-    ): Boolean {
-        val type = intOf(activityType, task)
-        val mode = intOf(windowingMode, task)
-        val wanted = if (split) WINDOWING_MODE_MULTI_WINDOW else WINDOWING_MODE_FULLSCREEN
-        val safe = type == ACTIVITY_TYPE_STANDARD && mode == wanted
-        if (!safe) {
-            Logger.info("split screen shell skipped task=${task.taskId} type=$type mode=$mode")
-        }
-        return safe
     }
 
     private fun isSplit(task: ActivityManager.RunningTaskInfo): Boolean =

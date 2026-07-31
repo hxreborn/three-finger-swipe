@@ -29,6 +29,7 @@ import androidx.compose.material.icons.outlined.Gesture
 import androidx.compose.material.icons.outlined.HourglassEmpty
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.RestartAlt
+import androidx.compose.material.icons.outlined.Splitscreen
 import androidx.compose.material.icons.outlined.SwipeDown
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.AlertDialog
@@ -73,6 +74,7 @@ import eu.hxreborn.tfs.action.ActionId
 import eu.hxreborn.tfs.prefs.AppPrefs
 import eu.hxreborn.tfs.prefs.CaptureMode
 import eu.hxreborn.tfs.prefs.Prefs
+import eu.hxreborn.tfs.prefs.SplitMethod
 import eu.hxreborn.tfs.ui.component.GestureIllustration
 import eu.hxreborn.tfs.ui.navigation.Destination
 import eu.hxreborn.tfs.ui.theme.AppTheme
@@ -195,7 +197,7 @@ fun HomeScreen(
                 )
 
                 navigablePreference(
-                    modifier = Modifier.preferenceCard(surface, shapeForPosition(3, 0)),
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(4, 0)),
                     key = "nav_capture_mode",
                     icon = { Icon(Icons.Outlined.CameraAlt, contentDescription = null) },
                     title = { Text(stringResource(R.string.screen_capture_mode)) },
@@ -215,10 +217,33 @@ fun HomeScreen(
                     onClick = { onNavigate(Destination.CaptureMode) },
                 )
 
+                preferenceSpacer("spacer_split_method")
+
+                navigablePreference(
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(4, 1)),
+                    key = "nav_split_method",
+                    icon = { Icon(Icons.Outlined.Splitscreen, contentDescription = null) },
+                    title = { Text(stringResource(R.string.screen_split_method)) },
+                    summary = {
+                        Text(
+                            when (state.splitMethod) {
+                                SplitMethod.NATIVE -> {
+                                    stringResource(R.string.pref_split_method_native_title)
+                                }
+
+                                SplitMethod.WM_SHELL -> {
+                                    stringResource(R.string.pref_split_method_shell_title)
+                                }
+                            },
+                        )
+                    },
+                    onClick = { onNavigate(Destination.SplitMethod) },
+                )
+
                 preferenceSpacer("spacer_capture")
 
                 navigablePreference(
-                    modifier = Modifier.preferenceCard(surface, shapeForPosition(3, 1)),
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(4, 2)),
                     key = "nav_trigger_distance",
                     icon = { Icon(Icons.Outlined.SwipeDown, contentDescription = null) },
                     title = { Text(stringResource(R.string.screen_trigger_distance)) },
@@ -231,7 +256,7 @@ fun HomeScreen(
                 preferenceSpacer("spacer_sensitivity")
 
                 navigablePreference(
-                    modifier = Modifier.preferenceCard(surface, shapeForPosition(3, 2)),
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(4, 3)),
                     key = "nav_edge_exclusion",
                     icon = { Icon(Icons.Outlined.BorderOuter, contentDescription = null) },
                     title = { Text(stringResource(R.string.screen_edge_exclusion)) },

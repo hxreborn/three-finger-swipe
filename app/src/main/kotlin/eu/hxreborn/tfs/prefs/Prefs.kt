@@ -10,6 +10,7 @@ object Prefs {
     val FINGER_LANDING_MS = IntPref("finger_landing_ms", 800, 200..1500, step = 50)
     val COOLDOWN_MS = IntPref("cooldown_ms", 500, 100..2000, step = 50)
     val CAPTURE_MODE = StringPref("capture_mode", CaptureMode.SYSTEM_API.key)
+    val SPLIT_METHOD = StringPref("split_method", SplitMethod.NATIVE.key)
     val SELECTED_ACTION = StringPref("selected_action", "screenshot")
 
     val all: List<PrefSpec<*>> =
@@ -19,6 +20,7 @@ object Prefs {
             FINGER_LANDING_MS,
             COOLDOWN_MS,
             CAPTURE_MODE,
+            SPLIT_METHOD,
             SELECTED_ACTION,
         )
 }

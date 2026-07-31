@@ -24,6 +24,11 @@
   <string name="pref_capture_mode_reflection_body">Uses Android\'s internal screenshot pipeline. Best for stock and Pixel-based ROMs.</string>
   <string name="pref_capture_mode_sysrq_title">SYSRQ key injection</string>
   <string name="pref_capture_mode_sysrq_body">Injects a Print Screen key event. Use this only if the System API mode does not work on your ROM. Some full-screen apps and games may consume the event before the system handles it.</string>
+  <string name="screen_split_method">Split screen method</string>
+  <string name="pref_split_method_native_title">System default (recommended)</string>
+  <string name="pref_split_method_native_body">Hands the split off to the launcher, so you get the usual app picker for the second half.</string>
+  <string name="pref_split_method_shell_title">Window manager shell</string>
+  <string name="pref_split_method_shell_body">Drives split screen directly and pairs the current app with the last one you used, skipping the picker. Use this only if the system default does nothing on your ROM.</string>
   <string name="pref_capture_mode_reboot">Reboot after changing the screenshot method.</string>
   <string name="value_approx_px">%1$d px on this device</string>
   <string name="value_approx_dp">\u2248 %1$d dp of travel on this screen</string>

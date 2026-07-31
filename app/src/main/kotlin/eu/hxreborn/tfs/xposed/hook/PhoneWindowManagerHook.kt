@@ -96,7 +96,7 @@ object PhoneWindowManagerHook {
                     bindings.systemContext,
                     bindings.screenshotDispatch,
                     phoneWindowManager.javaClass.classLoader,
-                )
+                ) { splitMethod }
             }
 
         var installed = false

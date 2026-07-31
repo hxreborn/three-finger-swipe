@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import eu.hxreborn.tfs.action.ActionId
 import eu.hxreborn.tfs.prefs.CaptureMode
 import eu.hxreborn.tfs.prefs.Prefs
+import eu.hxreborn.tfs.prefs.SplitMethod
 
 // process-local values keep RemotePreferences Binder IPC off the input thread
 
@@ -17,6 +18,8 @@ import eu.hxreborn.tfs.prefs.Prefs
 
 @Volatile internal var captureMode: CaptureMode = CaptureMode.fromKey(Prefs.CAPTURE_MODE.default)
 
+@Volatile internal var splitMethod: SplitMethod = SplitMethod.fromKey(Prefs.SPLIT_METHOD.default)
+
 @Volatile internal var selectedAction: ActionId = ActionId.fromKey(Prefs.SELECTED_ACTION.default)
 
 internal fun loadHookPrefs(prefs: SharedPreferences) {
@@ -25,5 +28,6 @@ internal fun loadHookPrefs(prefs: SharedPreferences) {
     fingerLandingMs = Prefs.FINGER_LANDING_MS.read(prefs)
     cooldownMs = Prefs.COOLDOWN_MS.read(prefs)
     captureMode = CaptureMode.fromKey(Prefs.CAPTURE_MODE.read(prefs))
+    splitMethod = SplitMethod.fromKey(Prefs.SPLIT_METHOD.read(prefs))
     selectedAction = ActionId.fromKey(Prefs.SELECTED_ACTION.read(prefs))
 }

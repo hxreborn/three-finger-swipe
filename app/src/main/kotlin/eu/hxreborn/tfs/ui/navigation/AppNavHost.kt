@@ -30,6 +30,7 @@ import eu.hxreborn.tfs.ui.screen.CaptureModeScreen
 import eu.hxreborn.tfs.ui.screen.EdgeExclusionScreen
 import eu.hxreborn.tfs.ui.screen.HomeScreen
 import eu.hxreborn.tfs.ui.screen.LicensesScreen
+import eu.hxreborn.tfs.ui.screen.SplitMethodScreen
 import eu.hxreborn.tfs.ui.screen.TriggerDistanceScreen
 import eu.hxreborn.tfs.ui.viewmodel.SettingsViewModel
 
@@ -113,6 +114,16 @@ fun AppNavHost(
                         captureMode = currentState.value.captureMode,
                         onCaptureModeChange = {
                             viewModel.savePref(Prefs.CAPTURE_MODE, it.key)
+                        },
+                        onBack = navigateUp,
+                    )
+                }
+
+                entry<Destination.SplitMethod> {
+                    SplitMethodScreen(
+                        splitMethod = currentState.value.splitMethod,
+                        onSplitMethodChange = {
+                            viewModel.savePref(Prefs.SPLIT_METHOD, it.key)
                         },
                         onBack = navigateUp,
                     )

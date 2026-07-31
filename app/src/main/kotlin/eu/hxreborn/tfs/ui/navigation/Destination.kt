@@ -17,6 +17,9 @@ sealed interface Destination : NavKey {
     data object CaptureMode : Destination
 
     @Serializable
+    data object SplitMethod : Destination
+
+    @Serializable
     data object About : Destination
 
     @Serializable
