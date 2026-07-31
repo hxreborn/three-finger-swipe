@@ -69,7 +69,7 @@ class ToggleSplitScreenAction(
                 ) ?: internalClass.findMethodUpward("goToFullscreenFromSplit")
             // A13 and older only have toggleSplitScreen which flips both ways on its own
             legacy = internalClass.findMethodUpward("toggleSplitScreen")
-            route = service?.let { SplitScreenShellRoute(it, internalClass).apply { probe() } }
+            route = service?.let { SplitScreenShellRoute(it, internalClass) }
         }.onFailure {
             Logger.warn("split screen unavailable reason=resolve-failed", it)
         }
@@ -93,21 +93,20 @@ class ToggleSplitScreenAction(
     override fun execute() {
         val task = focusedTask()
         val split = task != null && isSplit(task)
+        if (shellRoute?.resolved == true && task != null && shellSafe(task, split)) {
+            shellRoute.dispatch(task.taskId, split) { dispatchDirect(task, split) }
+            return
+        }
+        dispatchDirect(task, split)
+    }
+
+    private fun dispatchDirect(
+        task: ActivityManager.RunningTaskInfo?,
+        split: Boolean,
+    ) {
         runCatching {
             val service = statusBar ?: error("StatusBarManagerInternal unavailable")
             when {
-                shellRoute != null && task != null && split && shellRoute.canExit &&
-                    shellSafe(task, true) -> {
-                    shellRoute.exit(task.taskId)
-                    "shell-exit"
-                }
-
-                shellRoute != null && task != null && !split && shellRoute.canEnter &&
-                    shellSafe(task, false) -> {
-                    shellRoute.enter(task.taskId)
-                    "shell-enter"
-                }
-
                 enterSplit == null && legacyToggle != null -> {
                     legacyToggle.invoke(service)
                     "legacy"

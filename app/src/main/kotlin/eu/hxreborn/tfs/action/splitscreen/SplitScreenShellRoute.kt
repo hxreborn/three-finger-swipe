@@ -24,61 +24,49 @@ internal class SplitScreenShellRoute(
             FileDescriptor::class.java,
         )
 
-    @Volatile private var actions: Set<String> = emptySet()
+    @Volatile private var actions: Set<String>? = null
 
     val resolved: Boolean
         get() = shellCommand != null
 
-    val canEnter: Boolean
-        get() = ENTER_SPLIT in actions
-
-    val canExit: Boolean
-        get() = EXIT_SPLIT in actions
-
-    fun probe() {
-        if (shellCommand == null) {
-            Logger.warn("split screen shell route unavailable reason=no-shell-command")
-            return
+    fun dispatch(
+        taskId: Int,
+        split: Boolean,
+        fallback: () -> Unit,
+    ) = background {
+        val action = if (split) EXIT_SPLIT else ENTER_SPLIT
+        if (action !in supportedActions()) {
+            Logger.info("split screen shell route declined action=$action")
+            fallback()
+            return@background
         }
-        background {
-            val help = send("help").orEmpty()
-            actions =
-                if (help.contains(SPLIT_SCREEN)) {
-                    setOf(ENTER_SPLIT, EXIT_SPLIT).filterTo(mutableSetOf(), help::contains)
-                } else {
-                    emptySet()
-                }
-            Logger.info("split screen shell route actions=${actions.joinToString(",")}")
+        val side = if (split) emptyArray() else arrayOf(SIDE_STAGE_BOTTOM_OR_RIGHT.toString())
+        // the handler stays silent unless it refused the command
+        val refusal = send(SPLIT_SCREEN, action, taskId.toString(), *side)?.trim().orEmpty()
+        if (refusal.isEmpty()) {
+            Logger.info("split screen dispatched branch=shell-$action task=$taskId split=$split")
+        } else {
+            Logger.warn("split screen shell refused action=$action reason=$refusal")
         }
     }
 
-    fun enter(taskId: Int) =
-        background {
-            report(
-                ENTER_SPLIT,
-                send(
-                    SPLIT_SCREEN,
-                    ENTER_SPLIT,
-                    taskId.toString(),
-                    SIDE_STAGE_BOTTOM_OR_RIGHT.toString(),
-                ),
-            )
+    // SystemUI is not bound yet at systemReady so an empty help means retry rather than absent
+    private fun supportedActions(): Set<String> {
+        actions?.let { return it }
+        val help = send("help")
+        if (help.isNullOrBlank()) {
+            Logger.info("split screen shell route unresolved reason=no-status-bar")
+            return emptySet()
         }
-
-    fun exit(taskId: Int) =
-        background {
-            report(EXIT_SPLIT, send(SPLIT_SCREEN, EXIT_SPLIT, taskId.toString()))
-        }
-
-    // the handler stays silent unless it refused the command
-    private fun report(
-        action: String,
-        output: String?,
-    ) {
-        val refusal = output?.trim().orEmpty()
-        if (refusal.isNotEmpty()) {
-            Logger.warn("split screen shell refused action=$action reason=$refusal")
-        }
+        val found =
+            if (help.contains(SPLIT_SCREEN)) {
+                setOf(ENTER_SPLIT, EXIT_SPLIT).filterTo(mutableSetOf(), help::contains)
+            } else {
+                emptySet()
+            }
+        actions = found
+        Logger.info("split screen shell route actions=${found.joinToString(",")}")
+        return found
     }
 
     // the pipe transfer waits on SystemUI so it stays off the system_server main thread
