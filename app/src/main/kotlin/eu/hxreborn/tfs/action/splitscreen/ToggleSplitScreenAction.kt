@@ -9,7 +9,9 @@ import eu.hxreborn.tfs.util.findMethodUpward
 import eu.hxreborn.tfs.util.signature
 import java.lang.reflect.Method
 
+private const val WINDOWING_MODE_FULLSCREEN = 1
 private const val WINDOWING_MODE_MULTI_WINDOW = 6
+private const val ACTIVITY_TYPE_STANDARD = 1
 
 class ToggleSplitScreenAction(
     private val context: Context,
@@ -22,6 +24,8 @@ class ToggleSplitScreenAction(
     private val shellRoute: SplitScreenShellRoute?
     private val windowingMode: Method? =
         ActivityManager.RunningTaskInfo::class.java.findMethodUpward("getWindowingMode")
+    private val activityType: Method? =
+        ActivityManager.RunningTaskInfo::class.java.findMethodUpward("getActivityType")
 
     val available: Boolean
         get() =
@@ -92,12 +96,14 @@ class ToggleSplitScreenAction(
         runCatching {
             val service = statusBar ?: error("StatusBarManagerInternal unavailable")
             when {
-                shellRoute != null && task != null && split && shellRoute.canExit -> {
+                shellRoute != null && task != null && split && shellRoute.canExit &&
+                    shellSafe(task, true) -> {
                     shellRoute.exit(task.taskId)
                     "shell-exit"
                 }
 
-                shellRoute != null && task != null && !split && shellRoute.canEnter -> {
+                shellRoute != null && task != null && !split && shellRoute.canEnter &&
+                    shellSafe(task, false) -> {
                     shellRoute.enter(task.taskId)
                     "shell-enter"
                 }
@@ -139,10 +145,28 @@ class ToggleSplitScreenAction(
         }
     }
 
+    // moveToStage throws on the shell thread for a task WMShell does not own or already split
+    private fun shellSafe(
+        task: ActivityManager.RunningTaskInfo,
+        split: Boolean,
+    ): Boolean {
+        val type = intOf(activityType, task)
+        val mode = intOf(windowingMode, task)
+        val wanted = if (split) WINDOWING_MODE_MULTI_WINDOW else WINDOWING_MODE_FULLSCREEN
+        val safe = type == ACTIVITY_TYPE_STANDARD && mode == wanted
+        if (!safe) {
+            Logger.info("split screen shell skipped task=${task.taskId} type=$type mode=$mode")
+        }
+        return safe
+    }
+
     private fun isSplit(task: ActivityManager.RunningTaskInfo): Boolean =
-        runCatching {
-            windowingMode?.invoke(task) == WINDOWING_MODE_MULTI_WINDOW
-        }.getOrDefault(false)
+        intOf(windowingMode, task) == WINDOWING_MODE_MULTI_WINDOW
+
+    private fun intOf(
+        getter: Method?,
+        task: ActivityManager.RunningTaskInfo,
+    ): Int? = runCatching { getter?.invoke(task) as? Int }.getOrNull()
 
     private fun focusedTask(): ActivityManager.RunningTaskInfo? {
         val am =
