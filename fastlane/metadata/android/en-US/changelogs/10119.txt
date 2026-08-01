@@ -1,0 +1,1 @@
+Added a split screen method preference for ROMs where the native route fails and fixed gesture input teardown

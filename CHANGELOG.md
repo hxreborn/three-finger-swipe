@@ -5,11 +5,34 @@
 
 ### Features
 
-- [`184217b`](https://github.com/hxreborn/three-finger-swipe/commit/184217be3f55648a6b7858858b316ee1d20c7dfb) *(action)* Add toggle split screen action per Android version
+- [`58a5357`](https://github.com/hxreborn/three-finger-swipe/commit/58a5357a112d4035c4e7c9223b4ed415458f851c) *(prefs)* Add a split screen method preference by @hxreborn
 
-- [`0db870b`](https://github.com/hxreborn/three-finger-swipe/commit/0db870b8bfbe3d60c9189b1f056b8442fe20a098) *(module)* Support hot reload and register one guarded prefs listener
 
-- [`6559585`](https://github.com/hxreborn/three-finger-swipe/commit/65595853314fd2dccecd9d9bf7cf29993a7df02f) *(ui)* Add the split screen action and drop the debug log toggle
+### Bug Fixes
+
+- [`86b49d2`](https://github.com/hxreborn/three-finger-swipe/commit/86b49d29fb5038edf7c3dd68ad983b1f1a12f1f9) *(action)* Probe the split screen shell route lazily by @hxreborn
+
+- [`f0acca1`](https://github.com/hxreborn/three-finger-swipe/commit/f0acca18cd020d62402ecfdecac945629ca30007) *(action)* Skip the shell split route for tasks WMShell cannot stage by @hxreborn
+
+- [`19c16d9`](https://github.com/hxreborn/three-finger-swipe/commit/19c16d97a091d636dbfd626f37b8f8d32783e7f5) *(action)* Add a WMShell split screen route by @hxreborn
+
+- [`489131d`](https://github.com/hxreborn/three-finger-swipe/commit/489131d9689c2da8bcf9f52a51caae9a796fe31e) *(ci)* Title mirror releases and derive the code-name tag on re-mirror by @hxreborn
+
+- [`d3ac674`](https://github.com/hxreborn/three-finger-swipe/commit/d3ac67453f83687598ff1ba09c8ed8214fdcb849) *(gesture)* Dispose the input receiver on the main looper by @hxreborn
+
+
+
+## What's Changed
+
+
+
+### Features
+
+- [`184217b`](https://github.com/hxreborn/three-finger-swipe/commit/184217be3f55648a6b7858858b316ee1d20c7dfb) *(action)* Add toggle split screen action per Android version by @hxreborn
+
+- [`0db870b`](https://github.com/hxreborn/three-finger-swipe/commit/0db870b8bfbe3d60c9189b1f056b8442fe20a098) *(module)* Support hot reload and register one guarded prefs listener by @hxreborn
+
+- [`6559585`](https://github.com/hxreborn/three-finger-swipe/commit/65595853314fd2dccecd9d9bf7cf29993a7df02f) *(ui)* Add the split screen action and drop the debug log toggle by @hxreborn
 
 
 ### Bug Fixes
@@ -30,23 +53,23 @@
 
 ### Refactor
 
-- [`ec8fc51`](https://github.com/hxreborn/three-finger-swipe/commit/ec8fc5122915814ef0b2892168abafd74b11ede3) *(action)* Resolve system services once and close held resources
+- [`ec8fc51`](https://github.com/hxreborn/three-finger-swipe/commit/ec8fc5122915814ef0b2892168abafd74b11ede3) *(action)* Resolve system services once and close held resources by @hxreborn
 
-- [`510f5fb`](https://github.com/hxreborn/three-finger-swipe/commit/510f5fb0b05e8cfa8229436891173f4186a1a83a) *(hook)* Guard install and add teardown for the pointer listener
+- [`510f5fb`](https://github.com/hxreborn/three-finger-swipe/commit/510f5fb0b05e8cfa8229436891173f4186a1a83a) *(hook)* Guard install and add teardown for the pointer listener by @hxreborn
 
 - [`531a83b`](https://github.com/hxreborn/three-finger-swipe/commit/531a83bfd32799c3121146105894bb190c4b547d) *(hook)* Rename PhoneWindowManagerHooker to PhoneWindowManagerHook by @hxreborn
 
-- [`a35053c`](https://github.com/hxreborn/three-finger-swipe/commit/a35053c0ffa6d034d0c8dbf7635f790c36f3786d) *(module)* Move prefs and service binding ownership to App
+- [`a35053c`](https://github.com/hxreborn/three-finger-swipe/commit/a35053c0ffa6d034d0c8dbf7635f790c36f3786d) *(module)* Move prefs and service binding ownership to App by @hxreborn
 
-- [`7022e92`](https://github.com/hxreborn/three-finger-swipe/commit/7022e9246e0796aef4bcaa3cdd1be2178018ca0a) *(module)* Route logging through one severity based facade
+- [`7022e92`](https://github.com/hxreborn/three-finger-swipe/commit/7022e9246e0796aef4bcaa3cdd1be2178018ca0a) *(module)* Route logging through one severity based facade by @hxreborn
 
-- [`d4747ab`](https://github.com/hxreborn/three-finger-swipe/commit/d4747abd277f9ba3cb07a43bb798730f244337c2) *(prefs)* Pass remote prefs through a provider lambda
+- [`d4747ab`](https://github.com/hxreborn/three-finger-swipe/commit/d4747abd277f9ba3cb07a43bb798730f244337c2) *(prefs)* Pass remote prefs through a provider lambda by @hxreborn
 
 - [`e55a94a`](https://github.com/hxreborn/three-finger-swipe/commit/e55a94a60709325f7a117a6469a7d33b8b0450a0) *(prefs)* Rename PrefsState to AppPrefs by @hxreborn
 
 - [`514afb3`](https://github.com/hxreborn/three-finger-swipe/commit/514afb35484787130d6d5a5a7905e68da4005dba) *(ui)* Drop fillMaxWidth defaults on private helpers by @hxreborn
 
-- [`1df441d`](https://github.com/hxreborn/three-finger-swipe/commit/1df441d53cc0f6c6a029b38843e3e6bdfe40a336) *(util)* Tolerate arg count and class name drift by API level
+- [`1df441d`](https://github.com/hxreborn/three-finger-swipe/commit/1df441d53cc0f6c6a029b38843e3e6bdfe40a336) *(util)* Tolerate arg count and class name drift by API level by @hxreborn
 
 - [`b4946b9`](https://github.com/hxreborn/three-finger-swipe/commit/b4946b98e5f46cbcc69a926cc34610126e700a60) Rename App.service to mService by @hxreborn
 
@@ -68,16 +91,16 @@
 
 - [`c130fb4`](https://github.com/hxreborn/three-finger-swipe/commit/c130fb40459a03091a3b0bf8952f6eb110acb039) *(cliff)* Sync to shared dotfiles template by @hxreborn
 
-- [`62b6350`](https://github.com/hxreborn/three-finger-swipe/commit/62b6350f77d6f6c66a1405841745b3b34c89e706) Generate xposed module metadata and bump libxposed to 102.0.0
+- [`62b6350`](https://github.com/hxreborn/three-finger-swipe/commit/62b6350f77d6f6c66a1405841745b3b34c89e706) Generate xposed module metadata and bump libxposed to 102.0.0 by @hxreborn
 
 
 ### Miscellaneous
 
-- [`c1df58d`](https://github.com/hxreborn/three-finger-swipe/commit/c1df58d238ece12109fafae56ac6e85718635fe7) *(ci)* Skip docs style and release commits in the changelog config
+- [`c1df58d`](https://github.com/hxreborn/three-finger-swipe/commit/c1df58d238ece12109fafae56ac6e85718635fe7) *(ci)* Skip docs style and release commits in the changelog config by @hxreborn
 
 - [`19f0212`](https://github.com/hxreborn/three-finger-swipe/commit/19f0212bbb36de9f38767106036c54b2613e5006) *(xposed)* Set exceptionMode=protective by @hxreborn
 
-- [`d09630d`](https://github.com/hxreborn/three-finger-swipe/commit/d09630de3fa37410d5ea23b0ba730a8436e3cd3f) Tighten the gitignore markdown allowlist and ignore docs
+- [`d09630d`](https://github.com/hxreborn/three-finger-swipe/commit/d09630de3fa37410d5ea23b0ba730a8436e3cd3f) Tighten the gitignore markdown allowlist and ignore docs by @hxreborn
 
 
 
