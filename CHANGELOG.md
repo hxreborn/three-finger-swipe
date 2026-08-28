@@ -5,6 +5,21 @@
 
 ### Features
 
+- [`775d92a`](https://github.com/hxreborn/three-finger-swipe/commit/775d92a7e3efed3c5ca7aeed0fc3939177fc92ea) Add a per-app filter for where the gesture fires
+
+
+### Dependencies
+
+- [`08d6990`](https://github.com/hxreborn/three-finger-swipe/commit/08d69906e53c53a57d38d59140c2d7a88ced636d) *(deps)* Update the Gradle toolchain and AndroidX dependencies
+
+
+
+## What's Changed
+
+
+
+### Features
+
 - [`58a5357`](https://github.com/hxreborn/three-finger-swipe/commit/58a5357a112d4035c4e7c9223b4ed415458f851c) *(prefs)* Add a split screen method preference by @hxreborn
 
 
