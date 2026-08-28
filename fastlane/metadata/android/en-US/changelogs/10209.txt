@@ -1,0 +1,1 @@
+Added a per-app filter so the gesture can be disabled in chosen apps, or restricted to them
