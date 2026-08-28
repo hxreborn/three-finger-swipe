@@ -20,6 +20,9 @@ sealed interface Destination : NavKey {
     data object SplitMethod : Destination
 
     @Serializable
+    data object AppFilter : Destination
+
+    @Serializable
     data object About : Destination
 
     @Serializable

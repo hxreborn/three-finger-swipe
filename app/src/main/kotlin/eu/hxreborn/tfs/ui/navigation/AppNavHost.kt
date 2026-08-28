@@ -26,6 +26,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import eu.hxreborn.tfs.prefs.Prefs
 import eu.hxreborn.tfs.ui.screen.AboutScreen
+import eu.hxreborn.tfs.ui.screen.AppFilterScreen
 import eu.hxreborn.tfs.ui.screen.CaptureModeScreen
 import eu.hxreborn.tfs.ui.screen.EdgeExclusionScreen
 import eu.hxreborn.tfs.ui.screen.HomeScreen
@@ -125,6 +126,16 @@ fun AppNavHost(
                         onSplitMethodChange = {
                             viewModel.savePref(Prefs.SPLIT_METHOD, it.key)
                         },
+                        onBack = navigateUp,
+                    )
+                }
+
+                entry<Destination.AppFilter> {
+                    AppFilterScreen(
+                        mode = currentState.value.appFilterMode,
+                        filteredApps = currentState.value.filteredApps,
+                        onModeChange = { viewModel.savePref(Prefs.APP_FILTER_MODE, it.key) },
+                        onFilteredAppsChange = { viewModel.savePref(Prefs.FILTERED_APPS, it) },
                         onBack = navigateUp,
                     )
                 }

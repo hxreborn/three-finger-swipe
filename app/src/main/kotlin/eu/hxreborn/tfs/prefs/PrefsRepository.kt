@@ -54,6 +54,8 @@ class PrefsRepository(
         Prefs.CAPTURE_MODE.write(this, state.captureMode.key)
         Prefs.SPLIT_METHOD.write(this, state.splitMethod.key)
         Prefs.SELECTED_ACTION.write(this, state.selectedAction.key)
+        Prefs.APP_FILTER_MODE.write(this, state.appFilterMode.key)
+        Prefs.FILTERED_APPS.write(this, state.filteredApps)
     }
 
     fun syncToRemote() {
@@ -79,6 +81,8 @@ class PrefsRepository(
             captureMode = CaptureMode.fromKey(Prefs.CAPTURE_MODE.read(local)),
             splitMethod = SplitMethod.fromKey(Prefs.SPLIT_METHOD.read(local)),
             selectedAction = ActionId.fromKey(Prefs.SELECTED_ACTION.read(local)),
+            appFilterMode = AppFilterMode.fromKey(Prefs.APP_FILTER_MODE.read(local)),
+            filteredApps = Prefs.FILTERED_APPS.read(local),
         )
 }
 
@@ -90,4 +94,6 @@ data class AppPrefs(
     val captureMode: CaptureMode = CaptureMode.SYSTEM_API,
     val splitMethod: SplitMethod = SplitMethod.NATIVE,
     val selectedAction: ActionId = ActionId.SCREENSHOT,
+    val appFilterMode: AppFilterMode = AppFilterMode.BLOCK,
+    val filteredApps: Set<String> = emptySet(),
 )

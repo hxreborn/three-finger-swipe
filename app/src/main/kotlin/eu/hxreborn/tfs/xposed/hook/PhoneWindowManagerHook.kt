@@ -110,6 +110,7 @@ object PhoneWindowManagerHook {
                     config = config,
                     onTrigger = { handler.post { actions[selectedAction]?.execute() } },
                     onPilfer = { GestureInputMonitor.pilferPointers() },
+                    focusedPackage = bindings.focusedPackage ?: { null },
                 )
             val proxy =
                 Proxy.newProxyInstance(
@@ -132,7 +133,8 @@ object PhoneWindowManagerHook {
                 "hooks installed origin=${if (reloaded) "reload" else "boot"} " +
                     "unregister=${bindings.pointerUnregistration != null} " +
                     "screenshot=${bindings.screenshotDispatch != null} " +
-                    "splitscreen=${splitScreen?.available == true} pilfer=$pilfers",
+                    "splitscreen=${splitScreen?.available == true} pilfer=$pilfers " +
+                    "appfilter=${bindings.focusedPackage != null}",
             )
         } finally {
             if (!installed) {

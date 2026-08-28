@@ -75,3 +75,19 @@ class StringPref(
         editor.putString(key, value)
     }
 }
+
+class StringSetPref(
+    key: String,
+    default: Set<String>,
+) : PrefSpec<Set<String>>(key, default) {
+    override fun read(prefs: SharedPreferences): Set<String> =
+        prefs.getStringSet(key, default) ?: default
+
+    // Kotlin collection classes are absent in the framework process that unparcels this
+    override fun write(
+        editor: SharedPreferences.Editor,
+        value: Set<String>,
+    ) {
+        editor.putStringSet(key, HashSet(value))
+    }
+}

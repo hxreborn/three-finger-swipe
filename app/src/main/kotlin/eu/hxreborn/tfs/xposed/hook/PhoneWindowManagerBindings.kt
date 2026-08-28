@@ -7,14 +7,18 @@ import eu.hxreborn.tfs.action.screenshot.ScreenshotActionResolver
 import eu.hxreborn.tfs.action.screenshot.ScreenshotDispatch
 import eu.hxreborn.tfs.prefs.CaptureMode
 import eu.hxreborn.tfs.util.Logger
+import eu.hxreborn.tfs.util.findFieldUpward
 import eu.hxreborn.tfs.util.findMethodUpward
 import eu.hxreborn.tfs.util.findMethodUpwardOrWidest
 import eu.hxreborn.tfs.util.readField
 import eu.hxreborn.tfs.util.signature
+import java.lang.reflect.Field
 import java.lang.reflect.Method
 
 private const val REGISTER = "registerPointerEventListener"
 private const val UNREGISTER = "unregisterPointerEventListener"
+private const val FOCUSED_WINDOW = "mFocusedWindow"
+private const val OWNING_PACKAGE = "getOwningPackage"
 
 internal data class PhoneWindowManagerBindings(
     val systemContext: Context,
@@ -23,6 +27,7 @@ internal data class PhoneWindowManagerBindings(
     val pointerRegistration: PointerRegistration,
     val pointerUnregistration: PointerRegistration?,
     val screenshotDispatch: ScreenshotDispatch?,
+    val focusedPackage: FocusedPackage?,
 ) {
     companion object {
         private const val POINTER_LISTENER_NAME =
@@ -59,6 +64,12 @@ internal data class PhoneWindowManagerBindings(
                 else -> Logger.info("resolved ${pointerUnregistration.method.signature()}")
             }
 
+            val focusedPackage = FocusedPackage.resolve(displayPolicy)
+            when (focusedPackage) {
+                null -> Logger.warn("optional member absent $FOCUSED_WINDOW reason=no-field")
+                else -> Logger.info("resolved ${focusedPackage.signature}")
+            }
+
             val screenshotDispatch =
                 ScreenshotActionResolver.resolve(phoneWindowManager, handler, captureMode)
 
@@ -69,6 +80,7 @@ internal data class PhoneWindowManagerBindings(
                 pointerRegistration = pointerRegistration,
                 pointerUnregistration = pointerUnregistration,
                 screenshotDispatch = screenshotDispatch,
+                focusedPackage = focusedPackage,
             )
         }
 
@@ -112,4 +124,26 @@ internal data class PointerRegistration(
             target,
             *method.parameterTypes.map { if (it.isPrimitive) 0 else listener }.toTypedArray(),
         )
+}
+
+// DisplayPolicy holds the focused window since Android 10, PhoneWindowManager before that
+internal class FocusedPackage(
+    private val holder: Any,
+    private val field: Field,
+    private val accessor: Method,
+) : () -> String? {
+    val signature: String = "${field.declaringClass.name}#${field.name}"
+
+    override fun invoke(): String? =
+        runCatching {
+            field.get(holder)?.let { accessor.invoke(it) as? String }
+        }.getOrNull()
+
+    companion object {
+        fun resolve(holder: Any): FocusedPackage? {
+            val field = holder.javaClass.findFieldUpward(FOCUSED_WINDOW) ?: return null
+            val accessor = field.type.findMethodUpward(OWNING_PACKAGE) ?: return null
+            return FocusedPackage(holder, field, accessor)
+        }
+    }
 }

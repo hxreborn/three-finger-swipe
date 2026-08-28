@@ -12,6 +12,8 @@ object Prefs {
     val CAPTURE_MODE = StringPref("capture_mode", CaptureMode.SYSTEM_API.key)
     val SPLIT_METHOD = StringPref("split_method", SplitMethod.NATIVE.key)
     val SELECTED_ACTION = StringPref("selected_action", "screenshot")
+    val APP_FILTER_MODE = StringPref("app_filter_mode", AppFilterMode.BLOCK.key)
+    val FILTERED_APPS = StringSetPref("filtered_apps", emptySet())
 
     val all: List<PrefSpec<*>> =
         listOf(
@@ -22,5 +24,7 @@ object Prefs {
             CAPTURE_MODE,
             SPLIT_METHOD,
             SELECTED_ACTION,
+            APP_FILTER_MODE,
+            FILTERED_APPS,
         )
 }

@@ -58,4 +58,26 @@
   <string name="action_toggle_flashlight">Toggle flashlight</string>
   <string name="action_ringer_mode">Change ringer mode</string>
   <string name="action_toggle_split_screen">Toggle split screen</string>
+  <string name="screen_app_filter">App filter</string>
+  <string name="pref_app_filter_summary_off">Active in all apps</string>
+  <plurals name="app_filter_summary_block">
+    <item quantity="one">Disabled in %d app</item>
+    <item quantity="other">Disabled in %d apps</item>
+  </plurals>
+  <plurals name="app_filter_summary_allow">
+    <item quantity="one">Active in %d app</item>
+    <item quantity="other">Active in %d apps</item>
+  </plurals>
+  <string name="app_filter_mode_block">Disable in selected</string>
+  <string name="app_filter_mode_allow">Enable in selected</string>
+  <string name="app_filter_none">No apps selected. The gesture runs in every app.</string>
+  <string name="app_filter_search_hint">Search apps</string>
+  <string name="app_filter_deselect_all">Deselect all</string>
+  <string name="app_filter_clear_search">Clear search</string>
+  <string name="app_filter_show_system">Show system apps</string>
+  <string name="app_filter_show_all">Show all apps</string>
+  <string name="app_filter_refresh">Refresh app list</string>
+  <string name="app_filter_empty">No apps to show</string>
+  <string name="app_filter_empty_none">No apps found</string>
+  <string name="action_more_options">More options</string>
 </resources>

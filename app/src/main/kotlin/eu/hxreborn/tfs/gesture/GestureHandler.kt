@@ -9,7 +9,9 @@ import eu.hxreborn.tfs.action.ActionId
 import eu.hxreborn.tfs.util.Logger
 import eu.hxreborn.tfs.xposed.hook.cooldownMs
 import eu.hxreborn.tfs.xposed.hook.edgeExclusionDp
+import eu.hxreborn.tfs.xposed.hook.filteredApps
 import eu.hxreborn.tfs.xposed.hook.fingerLandingMs
+import eu.hxreborn.tfs.xposed.hook.isAppFiltered
 import eu.hxreborn.tfs.xposed.hook.selectedAction
 import eu.hxreborn.tfs.xposed.hook.swipeThresholdPct
 import kotlin.math.abs
@@ -20,6 +22,7 @@ class GestureHandler(
     private val config: GestureConfig = GestureConfig(),
     private val onTrigger: () -> Unit,
     private val onPilfer: () -> Unit = {},
+    private val focusedPackage: () -> String? = { null },
 ) {
     private val displayMetrics = context.applicationContext.resources.displayMetrics
     private val smallestDimension = minOf(displayMetrics.widthPixels, displayMetrics.heightPixels)
@@ -122,6 +125,11 @@ class GestureHandler(
                 GestureState.Idle
             }
 
+            isFilteredApp() -> {
+                Logger.debug { "gesture reject reason=app-filter pkg=${focusedPackage()}" }
+                GestureState.Idle
+            }
+
             else -> {
                 onPilfer()
                 GestureState.Tracking(
@@ -188,6 +196,9 @@ class GestureHandler(
         onTrigger()
         return GestureState.Triggered
     }
+
+    private fun isFilteredApp(): Boolean =
+        filteredApps.isNotEmpty() && isAppFiltered(focusedPackage())
 
     private fun isInCooldown(now: Long = SystemClock.elapsedRealtime()): Boolean {
         val cooldown = cooldownMs.toLong()

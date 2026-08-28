@@ -23,6 +23,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AppBlocking
 import androidx.compose.material.icons.outlined.BorderOuter
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Gesture
@@ -62,6 +63,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -197,7 +199,7 @@ fun HomeScreen(
                 )
 
                 navigablePreference(
-                    modifier = Modifier.preferenceCard(surface, shapeForPosition(4, 0)),
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(5, 0)),
                     key = "nav_capture_mode",
                     icon = { Icon(Icons.Outlined.CameraAlt, contentDescription = null) },
                     title = { Text(stringResource(R.string.screen_capture_mode)) },
@@ -220,7 +222,7 @@ fun HomeScreen(
                 preferenceSpacer("spacer_split_method")
 
                 navigablePreference(
-                    modifier = Modifier.preferenceCard(surface, shapeForPosition(4, 1)),
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(5, 1)),
                     key = "nav_split_method",
                     icon = { Icon(Icons.Outlined.Splitscreen, contentDescription = null) },
                     title = { Text(stringResource(R.string.screen_split_method)) },
@@ -243,7 +245,7 @@ fun HomeScreen(
                 preferenceSpacer("spacer_capture")
 
                 navigablePreference(
-                    modifier = Modifier.preferenceCard(surface, shapeForPosition(4, 2)),
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(5, 2)),
                     key = "nav_trigger_distance",
                     icon = { Icon(Icons.Outlined.SwipeDown, contentDescription = null) },
                     title = { Text(stringResource(R.string.screen_trigger_distance)) },
@@ -256,7 +258,7 @@ fun HomeScreen(
                 preferenceSpacer("spacer_sensitivity")
 
                 navigablePreference(
-                    modifier = Modifier.preferenceCard(surface, shapeForPosition(4, 3)),
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(5, 3)),
                     key = "nav_edge_exclusion",
                     icon = { Icon(Icons.Outlined.BorderOuter, contentDescription = null) },
                     title = { Text(stringResource(R.string.screen_edge_exclusion)) },
@@ -264,6 +266,29 @@ fun HomeScreen(
                         Text(stringResource(R.string.value_dp, state.edgeExclusionDp))
                     },
                     onClick = { onNavigate(Destination.EdgeExclusion) },
+                )
+
+                preferenceSpacer("spacer_edge_exclusion")
+
+                navigablePreference(
+                    modifier = Modifier.preferenceCard(surface, shapeForPosition(5, 4)),
+                    key = "nav_app_filter",
+                    icon = { Icon(Icons.Outlined.AppBlocking, contentDescription = null) },
+                    title = { Text(stringResource(R.string.screen_app_filter)) },
+                    summary = {
+                        Text(
+                            if (state.filteredApps.isEmpty()) {
+                                stringResource(R.string.pref_app_filter_summary_off)
+                            } else {
+                                pluralStringResource(
+                                    state.appFilterMode.summaryRes(),
+                                    state.filteredApps.size,
+                                    state.filteredApps.size,
+                                )
+                            },
+                        )
+                    },
+                    onClick = { onNavigate(Destination.AppFilter) },
                 )
 
                 preferenceCategory(
