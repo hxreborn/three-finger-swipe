@@ -1,8 +1,8 @@
 [versions]
 # Core
-kotlin = "2.3.20"
-agp = "9.2.1"
-composeBom = "2026.03.01"
+kotlin = "2.4.10"
+agp = "9.3.2"
+composeBom = "2026.08.00"
 
 # libxposed
 libxposedApi = "102.0.0"
@@ -10,24 +10,24 @@ libxposedService = "102.0.0"
 
 # AndroidX
 activityCompose = "1.13.0"
-lifecycleRuntimeKtx = "2.10.0"
-coreKtx = "1.18.0"
+lifecycleRuntimeKtx = "2.11.0"
+coreKtx = "1.19.0"
 coreSplashscreen = "1.2.0"
 
 # UI
-material3 = "1.5.0-alpha16"
+material3 = "1.5.0-alpha27"
 lottie = "6.7.1"
 composePreferences = "2.2.0"
 
 # Navigation
-navigation3 = "1.0.1"
+navigation3 = "1.1.7"
 
 # Serialization
-kotlinxSerialization = "1.10.0"
+kotlinxSerialization = "1.11.0"
 
 # About
-aboutlibrariesPlugin = "13.2.1"
-aboutlibrariesRuntime = "13.2.1"
+aboutlibrariesPlugin = "15.1.1"
+aboutlibrariesRuntime = "15.1.1"
 
 # Code quality
 ktlintCli = "1.8.0"
