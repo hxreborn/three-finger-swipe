@@ -1,12 +1,16 @@
 version: 2
 updates:
   - package-ecosystem: "gradle"
+    commit-message:
+      prefix: "ci(deps)"
     directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
 
   - package-ecosystem: "github-actions"
+    commit-message:
+      prefix: "ci(deps)"
     directory: "/"
     schedule:
       interval: "weekly"
