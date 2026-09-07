@@ -1,7 +1,7 @@
 [versions]
 # Core
 kotlin = "2.4.10"
-agp = "9.3.2"
+agp = "9.4.0"
 composeBom = "2026.08.00"
 
 # libxposed
