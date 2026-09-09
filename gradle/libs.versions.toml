@@ -27,7 +27,7 @@ kotlinxSerialization = "1.11.0"
 
 # About
 aboutlibrariesPlugin = "15.2.0"
-aboutlibrariesRuntime = "15.1.1"
+aboutlibrariesRuntime = "15.2.0"
 
 # Code quality
 ktlintCli = "1.8.0"
