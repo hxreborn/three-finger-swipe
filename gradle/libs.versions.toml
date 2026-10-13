@@ -2,7 +2,7 @@
 # Core
 kotlin = "2.4.10"
 agp = "9.4.0"
-composeBom = "2026.08.00"
+composeBom = "2026.09.00"
 
 # libxposed
 libxposedApi = "102.0.0"
