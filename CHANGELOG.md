@@ -3,6 +3,16 @@
 
 
 
+### Bug Fixes
+
+- [`a098d2f`](https://github.com/hxreborn/three-finger-swipe/commit/a098d2f9c8b1318311605fa1d66d883a0dec9f96) *(ui)* Restore the recommended capture mode and split method by @hxreborn
+
+
+
+## What's Changed
+
+
+
 ### Features
 
 - [`dd918bb`](https://github.com/hxreborn/three-finger-swipe/commit/dd918bb21a309f2237f5e7497979633ee4f2d9e0) *(ui)* Rebuild about with changelog, support links and morphing logo by @hxreborn
