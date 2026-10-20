@@ -44,6 +44,7 @@
   <string name="pref_split_method_native_body">Hands the split to the launcher, so you pick the second app as usual.</string>
   <string name="split_method_shell">Direct</string>
   <string name="pref_split_method_shell_body">Splits the screen directly and pairs the current app with the last one you used. Use it only if Launcher does nothing on your ROM.</string>
+  <string name="pref_recommended">Recommended: %1$s</string>
   <string name="pref_capture_mode_reboot">A new capture mode takes effect after a reboot.</string>
   <string name="value_approx_px">%1$d px on this device</string>
   <string name="value_approx_dp">≈ %1$d dp of travel on this screen</string>

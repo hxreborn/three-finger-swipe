@@ -14,6 +14,7 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -100,6 +101,7 @@ fun SettingsScreen(
                         index = 0,
                         options = CaptureMode.entries,
                         selected = state.captureMode,
+                        recommended = CaptureMode.SYSTEM_API,
                         onSelect = onCaptureModeChange,
                         label = {
                             when (it) {
@@ -121,6 +123,7 @@ fun SettingsScreen(
                         index = 1,
                         options = SplitMethod.entries,
                         selected = state.splitMethod,
+                        recommended = SplitMethod.NATIVE,
                         onSelect = onSplitMethodChange,
                         label = {
                             when (it) {
@@ -192,6 +195,7 @@ private fun <T> ChoiceRow(
     index: Int,
     options: List<T>,
     selected: T,
+    recommended: T,
     onSelect: (T) -> Unit,
     label: (T) -> Int,
     @StringRes note: Int? = null,
@@ -204,6 +208,10 @@ private fun <T> ChoiceRow(
             summary = {
                 Column {
                     Text(stringResource(summary))
+                    Text(
+                        stringResource(R.string.pref_recommended, stringResource(label(recommended))),
+                        color = MaterialTheme.colorScheme.primary,
+                    )
                     note?.let { Text(stringResource(it)) }
                 }
             },
