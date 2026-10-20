@@ -1,0 +1,2 @@
+- Added a Recommended line to Capture mode and Split screen method
+- Changed the 1.3.0 notes to one change per line
