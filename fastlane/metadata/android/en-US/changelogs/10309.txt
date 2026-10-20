@@ -1,0 +1,1 @@
+Split the app into Home and Settings tabs, added a status card that shows whether the module is running, a new About screen with release notes and support links, haptic feedback and tablet layouts, and fixed a dark flash at launch in light mode
