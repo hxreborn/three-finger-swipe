@@ -8,16 +8,13 @@ sealed interface Destination : NavKey {
     data object Home : Destination
 
     @Serializable
+    data object Settings : Destination
+
+    @Serializable
     data object EdgeExclusion : Destination
 
     @Serializable
     data object TriggerDistance : Destination
-
-    @Serializable
-    data object CaptureMode : Destination
-
-    @Serializable
-    data object SplitMethod : Destination
 
     @Serializable
     data object AppFilter : Destination
@@ -27,4 +24,7 @@ sealed interface Destination : NavKey {
 
     @Serializable
     data object Licenses : Destination
+
+    @Serializable
+    data object Changelog : Destination
 }

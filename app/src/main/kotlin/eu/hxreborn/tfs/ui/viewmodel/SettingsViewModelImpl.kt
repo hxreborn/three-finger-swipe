@@ -1,6 +1,7 @@
 package eu.hxreborn.tfs.ui.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -9,6 +10,8 @@ import eu.hxreborn.tfs.App
 import eu.hxreborn.tfs.BuildConfig
 import eu.hxreborn.tfs.prefs.AppPrefs
 import eu.hxreborn.tfs.prefs.PrefSpec
+import eu.hxreborn.tfs.util.Logger
+import io.github.libxposed.service.HookedTarget
 import io.github.libxposed.service.XposedService
 import io.github.libxposed.service.XposedServiceHelper
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 class SettingsViewModelImpl(
     application: Application,
@@ -34,9 +38,11 @@ class SettingsViewModelImpl(
             initialValue = AppPrefs(),
         )
 
-    private val _xposedServiceAvailable = MutableStateFlow(false)
-    override val xposedServiceAvailable: StateFlow<Boolean> =
-        _xposedServiceAvailable.asStateFlow()
+    private val _moduleStatus = MutableStateFlow<ModuleStatus>(ModuleStatus.Inactive)
+    override val moduleStatus: StateFlow<ModuleStatus> = _moduleStatus.asStateFlow()
+
+    private val statusRefreshClaim = AtomicBoolean(false)
+    private val statusRefreshPending = AtomicBoolean(false)
 
     private val serviceListener =
         object : XposedServiceHelper.OnServiceListener {
@@ -60,12 +66,55 @@ class SettingsViewModelImpl(
 
     override fun onServiceBound(service: XposedService) {
         mService = service
-        _xposedServiceAvailable.value = true
+        refreshModuleStatus()
     }
 
     override fun onServiceDied() {
         mService = null
-        _xposedServiceAvailable.value = false
+        _moduleStatus.value = ModuleStatus.Inactive
+    }
+
+    override fun refreshModuleStatus() {
+        val service = mService
+        if (service == null) {
+            _moduleStatus.value = ModuleStatus.Inactive
+            return
+        }
+        statusRefreshPending.set(true)
+        if (!statusRefreshClaim.compareAndSet(false, true)) return
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                while (statusRefreshPending.getAndSet(false)) {
+                    val current = mService ?: break
+                    val status =
+                        runCatching { readModuleStatus(current) }
+                            .onFailure { Log.w(Logger.TAG, "module status read failed reason=${it.message}", it) }
+                            .getOrNull()
+                    if (status != null && mService === current) _moduleStatus.value = status
+                }
+            } finally {
+                statusRefreshClaim.set(false)
+            }
+            if (statusRefreshPending.get() || mService !== service) refreshModuleStatus()
+        }
+    }
+
+    private fun readModuleStatus(service: XposedService): ModuleStatus {
+        val framework =
+            Framework(
+                name = service.frameworkName,
+                version = service.frameworkVersion,
+                apiVersion = service.apiVersion,
+            )
+        if (framework.apiVersion < XposedService.API_102) return ModuleStatus.Enabled(framework)
+        val target =
+            runCatching { service.runningTargets.firstOrNull() }
+                .getOrElse { return ModuleStatus.Enabled(framework) }
+        return when {
+            target == null -> ModuleStatus.RebootNeeded(framework)
+            target.state == HookedTarget.State.UP_TO_DATE -> ModuleStatus.Running(framework)
+            else -> ModuleStatus.Outdated(framework, target.loadedVersionCode)
+        }
     }
 
     override fun <T : Any> savePref(
@@ -109,6 +158,7 @@ class SettingsViewModelImpl(
                 targets.forEach { target ->
                     service.hotReloadModule(target, null) { reloaded, result ->
                         report("hot reload ${reloaded.processName}: ${result.status()}")
+                        refreshModuleStatus()
                     }
                 }
             }.onFailure { report("hot reload failed: ${it.message}") }
