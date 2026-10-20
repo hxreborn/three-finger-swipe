@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,7 +34,6 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Android
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Deselect
@@ -48,15 +49,11 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -68,6 +65,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -76,12 +74,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -91,11 +93,16 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import eu.hxreborn.tfs.R
 import eu.hxreborn.tfs.prefs.AppFilterMode
+import eu.hxreborn.tfs.ui.component.ChoiceButtonGroup
+import eu.hxreborn.tfs.ui.theme.Tokens
 import eu.hxreborn.tfs.ui.util.drawVerticalScrollbar
 import eu.hxreborn.tfs.ui.util.rememberAppIcon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -186,6 +193,7 @@ fun AppFilterScreen(
     onBack: () -> Unit,
 ) {
     val apps = rememberLaunchableApps()
+    val haptics = LocalHapticFeedback.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     var menuOpen by remember { mutableStateOf(false) }
     var showSystemApps by rememberSaveable { mutableStateOf(true) }
@@ -194,16 +202,10 @@ fun AppFilterScreen(
         modifier = modifier,
         contentWindowInsets = WindowInsets.navigationBars.union(WindowInsets.ime),
         topBar = {
-            LargeTopAppBar(
-                title = { Text(stringResource(R.string.screen_app_filter)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.action_navigate_up),
-                        )
-                    }
-                },
+            DetailTopBar(
+                title = stringResource(R.string.screen_app_filter),
+                onBack = onBack,
+                scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = { menuOpen = true }) {
                         Icon(
@@ -216,6 +218,9 @@ fun AppFilterScreen(
                             text = { Text(stringResource(R.string.app_filter_show_system)) },
                             onClick = {
                                 menuOpen = false
+                                haptics.performHapticFeedback(
+                                    if (showSystemApps) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn,
+                                )
                                 showSystemApps = !showSystemApps
                             },
                             trailingIcon = { Checkbox(checked = showSystemApps, onCheckedChange = null) },
@@ -233,6 +238,7 @@ fun AppFilterScreen(
                             text = { Text(stringResource(R.string.app_filter_deselect_all)) },
                             onClick = {
                                 menuOpen = false
+                                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                                 onFilteredAppsChange(emptySet())
                             },
                             leadingIcon = { Icon(Icons.Outlined.Deselect, contentDescription = null) },
@@ -240,7 +246,6 @@ fun AppFilterScreen(
                         )
                     }
                 },
-                scrollBehavior = scrollBehavior,
             )
         },
     ) { innerPadding ->
@@ -254,6 +259,7 @@ fun AppFilterScreen(
             selected = filteredApps,
             onModeChange = onModeChange,
             onToggle = { pkg, checked ->
+                haptics.performHapticFeedback(if (checked) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
                 onFilteredAppsChange(if (checked) filteredApps + pkg else filteredApps - pkg)
             },
         )
@@ -296,13 +302,34 @@ private fun AppFilterContent(
     val filtersActive = query.isNotBlank() || !showSystemApps
     val listState = rememberLazyListState()
     val pullState = rememberPullToRefreshState()
+    val haptics = LocalHapticFeedback.current
+    val direction = LocalLayoutDirection.current
 
-    Column(Modifier.fillMaxSize().padding(innerPadding)) {
+    LaunchedEffect(pullState, apps) {
+        snapshotFlow { pullState.distanceFraction >= 1f }
+            .distinctUntilChanged()
+            .filter { it && !apps.isRefreshing }
+            .collect { haptics.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate) }
+    }
+    LaunchedEffect(apps) {
+        snapshotFlow { apps.isRefreshing }
+            .drop(1)
+            .filter { !it }
+            .collect { haptics.performHapticFeedback(HapticFeedbackType.Confirm) }
+    }
+
+    Column(
+        Modifier.fillMaxSize().padding(
+            start = innerPadding.calculateStartPadding(direction) + wideScreenInset,
+            top = innerPadding.calculateTopPadding(),
+            end = innerPadding.calculateEndPadding(direction) + wideScreenInset,
+        ),
+    ) {
         ModeSelector(
             mode = mode,
             onModeChange = onModeChange,
             selectedCount = selected.size,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.padding(vertical = 8.dp),
         )
 
         TextField(
@@ -357,7 +384,7 @@ private fun AppFilterContent(
                         .fillMaxSize()
                         .nestedScroll(scrollBehavior.nestedScrollConnection)
                         .drawVerticalScrollbar(listState),
-                contentPadding = PaddingValues(bottom = 24.dp),
+                contentPadding = PaddingValues(bottom = innerPadding.calculateBottomPadding() + 24.dp),
             ) {
                 if (visibleApps.isEmpty()) {
                     item(key = "empty") {
@@ -384,6 +411,7 @@ private fun AppFilterContent(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ModeSelector(
     mode: AppFilterMode,
@@ -392,25 +420,22 @@ private fun ModeSelector(
     onModeChange: (AppFilterMode) -> Unit,
 ) {
     Column(modifier = modifier) {
-        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-            AppFilterMode.entries.forEachIndexed { index, option ->
-                SegmentedButton(
-                    selected = option == mode,
-                    onClick = { onModeChange(option) },
-                    shape = SegmentedButtonDefaults.itemShape(index, AppFilterMode.entries.size),
-                ) {
-                    Text(
-                        stringResource(option.labelRes()),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+        val haptics = LocalHapticFeedback.current
+        ChoiceButtonGroup(
+            options = AppFilterMode.entries,
+            selected = mode,
+            onSelect = {
+                if (it != mode) {
+                    haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                    onModeChange(it)
                 }
-            }
-        }
+            },
+            label = { stringResource(it.labelRes()) },
+        )
         AnimatedContent(
             targetState = mode,
             transitionSpec = { fadeIn() togetherWith fadeOut() },
-            modifier = Modifier.padding(top = 8.dp),
+            modifier = Modifier.padding(horizontal = Tokens.SpacingLg),
             label = "filter-mode-summary",
         ) { target ->
             Text(
