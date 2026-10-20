@@ -91,6 +91,23 @@ abstract class RenameApkTask : DefaultTask() {
     }
 }
 
+abstract class BundleReleaseNotes : DefaultTask() {
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val notes: ConfigurableFileCollection
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun run() {
+        val dest = outputDir.get().dir("release_notes").asFile
+        dest.deleteRecursively()
+        dest.mkdirs()
+        notes.forEach { it.copyTo(dest.resolve(it.name), overwrite = true) }
+    }
+}
+
 android {
     namespace = "eu.hxreborn.tfs"
     compileSdk = 37
@@ -237,11 +254,21 @@ val generateXposedModuleProp by tasks.registering(GenerateXposedModuleProp::clas
     moduleTargetApiVersion.set(cfgXposedApiTarget)
 }
 
+val bundleReleaseNotes by tasks.registering(BundleReleaseNotes::class) {
+    notes.from(
+        rootProject.fileTree("fastlane/metadata/android/en-US/changelogs") { include("*.txt") },
+    )
+}
+
 androidComponents {
     onVariants { variant ->
         variant.sources.resources?.addGeneratedSourceDirectory(
             generateXposedModuleProp,
             GenerateXposedModuleProp::outputDir,
+        )
+        variant.sources.assets?.addGeneratedSourceDirectory(
+            bundleReleaseNotes,
+            BundleReleaseNotes::outputDir,
         )
 
         val versionName = android.defaultConfig.versionName ?: "unknown"
