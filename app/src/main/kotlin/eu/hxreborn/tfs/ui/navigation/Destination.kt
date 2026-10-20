@@ -24,4 +24,7 @@ sealed interface Destination : NavKey {
 
     @Serializable
     data object Licenses : Destination
+
+    @Serializable
+    data object Changelog : Destination
 }

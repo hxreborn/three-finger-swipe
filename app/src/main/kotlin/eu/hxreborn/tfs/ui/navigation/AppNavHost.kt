@@ -66,13 +66,14 @@ import eu.hxreborn.tfs.prefs.Prefs
 import eu.hxreborn.tfs.ui.component.sectionPreferenceTheme
 import eu.hxreborn.tfs.ui.screen.AboutScreen
 import eu.hxreborn.tfs.ui.screen.AppFilterScreen
+import eu.hxreborn.tfs.ui.screen.ChangelogScreen
 import eu.hxreborn.tfs.ui.screen.EdgeExclusionScreen
 import eu.hxreborn.tfs.ui.screen.HomeScreen
 import eu.hxreborn.tfs.ui.screen.LicensesScreen
 import eu.hxreborn.tfs.ui.screen.SettingsScreen
 import eu.hxreborn.tfs.ui.screen.TriggerDistanceScreen
-import eu.hxreborn.tfs.ui.viewmodel.ModuleStatus
 import eu.hxreborn.tfs.ui.viewmodel.SettingsViewModel
+import eu.hxreborn.tfs.ui.viewmodel.framework
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 
 private val NavBarHeight = 64.dp
@@ -218,8 +219,9 @@ fun AppNavHost(
 
                 entry<Destination.About> {
                     AboutScreen(
-                        xposedServiceAvailable = currentModuleStatus.value !is ModuleStatus.Inactive,
+                        framework = currentModuleStatus.value.framework,
                         onNavigateToLicenses = { backStack.add(Destination.Licenses) },
+                        onNavigateToChangelog = { backStack.add(Destination.Changelog) },
                         onTriggerHotReload = viewModel::triggerHotReload,
                         onBack = navigateUp,
                     )
@@ -227,6 +229,10 @@ fun AppNavHost(
 
                 entry<Destination.Licenses> {
                     LicensesScreen(onBack = navigateUp)
+                }
+
+                entry<Destination.Changelog> {
+                    ChangelogScreen(onBack = navigateUp)
                 }
             }
         }

@@ -52,9 +52,6 @@
   <string name="snackbar_reset_done">Settings reset</string>
   <string name="snackbar_undo">Undo</string>
 
-  <string name="about_module_status">Xposed service</string>
-  <string name="about_module_active">Connected</string>
-  <string name="about_module_inactive">Unavailable</string>
   <string name="about_row_summary">Version %1$s</string>
   <string name="about_tagline">Three-finger swipe down to take a screenshot</string>
   <string name="about_star">Star on GitHub</string>
