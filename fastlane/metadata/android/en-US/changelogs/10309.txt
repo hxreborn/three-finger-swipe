@@ -1,1 +1,8 @@
-Split the app into Home and Settings tabs, added a status card that shows whether the module is running, a new About screen with release notes and support links, haptic feedback and tablet layouts, and fixed a dark flash at launch in light mode
+- Added Home and Settings tabs with a floating navigation bar
+- Added a status card that shows if the module runs in System Framework
+- Added an About screen with release notes, the full changelog and support links
+- Added haptic feedback to choices, sliders and resets
+- Changed single-choice settings to connected button rows
+- Fixed settings stretching across tablet screens
+- Fixed a dark flash at launch in light mode
+- Updated core libraries
