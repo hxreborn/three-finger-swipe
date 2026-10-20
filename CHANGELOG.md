@@ -5,12 +5,53 @@
 
 ### Features
 
-- [`775d92a`](https://github.com/hxreborn/three-finger-swipe/commit/775d92a7e3efed3c5ca7aeed0fc3939177fc92ea) Add a per-app filter for where the gesture fires
+- [`dd918bb`](https://github.com/hxreborn/three-finger-swipe/commit/dd918bb21a309f2237f5e7497979633ee4f2d9e0) *(ui)* Rebuild about with changelog, support links and morphing logo by @hxreborn
+
+- [`86e411b`](https://github.com/hxreborn/three-finger-swipe/commit/86e411bda8c87b18c5bcdb210f4323c1ad99b5d4) *(ui)* Split home and settings behind a floating navigation bar by @hxreborn
+
+- [`1cb7899`](https://github.com/hxreborn/three-finger-swipe/commit/1cb78993efc6f212866a4a7b7c0dfe82ed5041c8) *(ui)* Use segmented rows and haptics in the detail screens by @hxreborn
+
+- [`4a5b1af`](https://github.com/hxreborn/three-finger-swipe/commit/4a5b1af08947caf7c2e59746effeb8fa5557ace0) *(ui)* Read module status from the running xposed targets by @hxreborn
+
+
+### Bug Fixes
+
+- [`f36cd75`](https://github.com/hxreborn/three-finger-swipe/commit/f36cd756b4521188423b530d50c2da1c8d0650b3) *(ui)* Match window and splash background to the night mode by @hxreborn
 
 
 ### Dependencies
 
-- [`08d6990`](https://github.com/hxreborn/three-finger-swipe/commit/08d69906e53c53a57d38d59140c2d7a88ced636d) *(deps)* Update the Gradle toolchain and AndroidX dependencies
+- [`297ba42`](https://github.com/hxreborn/three-finger-swipe/commit/297ba429288f446b14bcdec6ede344c163f01b7d) *(deps)* Bump material3 to 1.5.0-alpha29 by @dependabot[bot] in [#41](https://github.com/hxreborn/three-finger-swipe/pull/41)
+
+- [`2f74e38`](https://github.com/hxreborn/three-finger-swipe/commit/2f74e384c86951402f12e169cf7bf7b263ed06f9) *(deps)* Bump gradle wrapper to 9.8.0 by @dependabot[bot] in [#40](https://github.com/hxreborn/three-finger-swipe/pull/40)
+
+- [`c5c6d40`](https://github.com/hxreborn/three-finger-swipe/commit/c5c6d409244ad35ac82d8519481b79951f26062c) *(deps)* Bump android gradle plugin to 9.4.1 by @dependabot[bot] in [#39](https://github.com/hxreborn/three-finger-swipe/pull/39)
+
+- [`2fb4ebe`](https://github.com/hxreborn/three-finger-swipe/commit/2fb4ebedf67521357ded70363d8a1b74aaf3f72c) *(deps)* Bump compose-bom to 2026.09.00 by @dependabot[bot] in [#38](https://github.com/hxreborn/three-finger-swipe/pull/38)
+
+- [`fb110dc`](https://github.com/hxreborn/three-finger-swipe/commit/fb110dc89ad4bbe9abada7bb88d3ce5ff1c85f03) *(deps)* Bump kotlin to 2.4.20 by @dependabot[bot] in [#36](https://github.com/hxreborn/three-finger-swipe/pull/36)
+
+- [`7ea27a2`](https://github.com/hxreborn/three-finger-swipe/commit/7ea27a2464c46efe7904ac75b4fbb1899640bc34) *(deps)* Bump aboutlibrariesRuntime from 15.1.1 to 15.2.0 by @dependabot[bot] in [#35](https://github.com/hxreborn/three-finger-swipe/pull/35)
+
+
+### Build
+
+- [`8c08622`](https://github.com/hxreborn/three-finger-swipe/commit/8c08622b5692708eccc7b41a4503572a8c72e1b7) Bundle the fastlane release notes as app assets by @hxreborn
+
+
+
+## What's Changed
+
+
+
+### Features
+
+- [`775d92a`](https://github.com/hxreborn/three-finger-swipe/commit/775d92a7e3efed3c5ca7aeed0fc3939177fc92ea) Add a per-app filter for where the gesture fires by @hxreborn
+
+
+### Dependencies
+
+- [`08d6990`](https://github.com/hxreborn/three-finger-swipe/commit/08d69906e53c53a57d38d59140c2d7a88ced636d) *(deps)* Update the Gradle toolchain and AndroidX dependencies by @hxreborn
 
 
 
