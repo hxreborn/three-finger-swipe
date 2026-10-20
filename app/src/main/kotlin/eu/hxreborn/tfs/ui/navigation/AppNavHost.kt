@@ -33,6 +33,7 @@ import eu.hxreborn.tfs.ui.screen.HomeScreen
 import eu.hxreborn.tfs.ui.screen.LicensesScreen
 import eu.hxreborn.tfs.ui.screen.SplitMethodScreen
 import eu.hxreborn.tfs.ui.screen.TriggerDistanceScreen
+import eu.hxreborn.tfs.ui.viewmodel.ModuleStatus
 import eu.hxreborn.tfs.ui.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -43,12 +44,12 @@ fun AppNavHost(
 ) {
     val backStack = rememberNavBackStack(Destination.Home)
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val xposedServiceAvailable by viewModel.xposedServiceAvailable.collectAsStateWithLifecycle()
+    val moduleStatus by viewModel.moduleStatus.collectAsStateWithLifecycle()
     val activity = LocalContext.current.findActivity()
     val density = LocalDensity.current
     val slideDistance = with(density) { 30.dp.roundToPx() }
     val currentState = rememberUpdatedState(state)
-    val currentXposedServiceAvailable = rememberUpdatedState(xposedServiceAvailable)
+    val currentXposedServiceAvailable = rememberUpdatedState(moduleStatus !is ModuleStatus.Inactive)
     val navigateUp =
         remember(backStack) {
             {
