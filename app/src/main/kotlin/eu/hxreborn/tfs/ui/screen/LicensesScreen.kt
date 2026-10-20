@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import eu.hxreborn.tfs.R
@@ -35,7 +36,7 @@ fun LicensesScreen(
                 Modifier
                     .fillMaxSize()
                     .consumeWindowInsets(innerPadding),
-            contentPadding = innerPadding,
+            contentPadding = innerPadding.withScreenGutter(bottom = 0.dp, horizontal = 0.dp),
         )
     }
 }

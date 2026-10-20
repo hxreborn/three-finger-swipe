@@ -5,53 +5,41 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.RestartAlt
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import eu.hxreborn.tfs.R
+import eu.hxreborn.tfs.ui.theme.Tokens
+import eu.hxreborn.tfs.ui.util.shapeForPosition
+import me.zhanghai.compose.preference.Preference
+import me.zhanghai.compose.preference.PreferenceCategory
 
 enum class RowTrailing { None, Chevron, External }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-fun Modifier.rowGap(index: Int): Modifier = if (index > 0) padding(top = ListItemDefaults.SegmentedGap) else this
+val rowSurface: Color
+    @Composable get() = MaterialTheme.colorScheme.surfaceContainerHigh
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun segmentedRowColors() = ListItemDefaults.segmentedColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+fun Modifier.groupedRow(
+    surface: Color,
+    index: Int,
+    count: Int,
+): Modifier =
+    (if (index > 0) padding(top = Tokens.PreferenceItemGap) else this)
+        .groupedPreference(surface, shapeForPosition(count, index))
 
 @Composable
-fun SectionHeader(
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
-        modifier =
-            modifier
-                .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 8.dp)
-                .semantics { heading() },
-    )
+fun SectionHeader(text: String) {
+    PreferenceCategory(title = { Text(text) })
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsRow(
     title: String,
@@ -61,35 +49,41 @@ fun SettingsRow(
     modifier: Modifier = Modifier,
     summary: String? = null,
     icon: ImageVector? = null,
-    trailing: RowTrailing = RowTrailing.Chevron,
+    trailing: RowTrailing = RowTrailing.None,
 ) {
-    SegmentedListItem(
-        onClick = onClick,
-        shapes = ListItemDefaults.segmentedShapes(index, count),
-        colors = segmentedRowColors(),
-        modifier = modifier.rowGap(index),
-        leadingContent = icon?.let { { Icon(it, contentDescription = null) } },
-        supportingContent = summary?.let { { Text(it) } },
-        trailingContent =
+    Preference(
+        title = { PreferenceTitle(title) },
+        modifier = modifier.groupedRow(rowSurface, index, count),
+        icon = icon?.let { { Icon(it, contentDescription = null) } },
+        summary = summary?.let { { Text(it) } },
+        widgetContainer =
             when (trailing) {
                 RowTrailing.None -> {
                     null
                 }
 
                 RowTrailing.Chevron -> {
-                    { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) }
+                    { TrailingIcon(Icons.AutoMirrored.Filled.KeyboardArrowRight) }
                 }
 
                 RowTrailing.External -> {
-                    { Icon(Icons.AutoMirrored.Outlined.OpenInNew, contentDescription = null) }
+                    { TrailingIcon(Icons.AutoMirrored.Outlined.OpenInNew) }
                 }
             },
-    ) {
-        Text(title)
-    }
+        onClick = onClick,
+    )
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun TrailingIcon(icon: ImageVector) {
+    Icon(
+        icon,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(end = Tokens.SpacingLg),
+    )
+}
+
 @Composable
 fun InfoRow(
     title: String,
@@ -99,45 +93,12 @@ fun InfoRow(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
 ) {
-    SegmentedListItem(
-        shapes = ListItemDefaults.segmentedShapes(index, count),
-        colors = segmentedRowColors(),
-        modifier = modifier.rowGap(index),
-        leadingContent = icon?.let { { Icon(it, contentDescription = null) } },
-        supportingContent = { Text(summary) },
-    ) {
-        Text(title)
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun ChoiceRow(
-    title: String,
-    description: String,
-    selected: Boolean,
-    index: Int,
-    count: Int,
-    onSelect: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val haptics = LocalHapticFeedback.current
-    SegmentedListItem(
-        selected = selected,
-        onClick = {
-            if (!selected) {
-                haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                onSelect()
-            }
-        },
-        shapes = ListItemDefaults.segmentedShapes(index, count),
-        colors = segmentedRowColors(),
-        modifier = modifier.rowGap(index).semantics { role = Role.RadioButton },
-        leadingContent = { RadioButton(selected = selected, onClick = null) },
-        supportingContent = { Text(description) },
-    ) {
-        Text(title)
-    }
+    Preference(
+        title = { PreferenceTitle(title) },
+        modifier = modifier.groupedRow(rowSurface, index, count),
+        icon = icon?.let { { Icon(it, contentDescription = null) } },
+        summary = { Text(summary) },
+    )
 }
 
 @Composable

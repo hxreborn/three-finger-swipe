@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.clearText
@@ -42,7 +41,6 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SearchOff
-import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -60,9 +58,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.ToggleButton
-import androidx.compose.material3.ToggleButtonDefaults
-import androidx.compose.material3.ToggleButtonShapes
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -92,15 +87,14 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import eu.hxreborn.tfs.R
 import eu.hxreborn.tfs.prefs.AppFilterMode
-import eu.hxreborn.tfs.ui.component.AdaptiveButtonRow
+import eu.hxreborn.tfs.ui.component.ChoiceButtonGroup
+import eu.hxreborn.tfs.ui.theme.Tokens
 import eu.hxreborn.tfs.ui.util.drawVerticalScrollbar
 import eu.hxreborn.tfs.ui.util.rememberAppIcon
 import kotlinx.coroutines.CoroutineScope
@@ -326,16 +320,16 @@ private fun AppFilterContent(
 
     Column(
         Modifier.fillMaxSize().padding(
-            start = innerPadding.calculateStartPadding(direction),
+            start = innerPadding.calculateStartPadding(direction) + wideScreenInset,
             top = innerPadding.calculateTopPadding(),
-            end = innerPadding.calculateEndPadding(direction),
+            end = innerPadding.calculateEndPadding(direction) + wideScreenInset,
         ),
     ) {
         ModeSelector(
             mode = mode,
             onModeChange = onModeChange,
             selectedCount = selected.size,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.padding(vertical = 8.dp),
         )
 
         TextField(
@@ -427,56 +421,21 @@ private fun ModeSelector(
 ) {
     Column(modifier = modifier) {
         val haptics = LocalHapticFeedback.current
-        val options = AppFilterMode.entries
-        AdaptiveButtonRow(
-            count = options.size,
-            modifier = Modifier.fillMaxWidth().selectableGroup(),
-        ) { index, stacked ->
-            val option = options[index]
-            val checked = option == mode
-            ToggleButton(
-                checked = checked,
-                onCheckedChange = {
-                    if (!checked) {
-                        haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                        onModeChange(option)
-                    }
-                },
-                shapes =
-                    when {
-                        stacked -> {
-                            ToggleButtonShapes(
-                                ToggleButtonDefaults.shape,
-                                ToggleButtonDefaults.pressedShape,
-                                ToggleButtonDefaults.checkedShape,
-                            )
-                        }
-
-                        index == 0 -> {
-                            ButtonGroupDefaults.connectedLeadingButtonShapes()
-                        }
-
-                        index == options.lastIndex -> {
-                            ButtonGroupDefaults.connectedTrailingButtonShapes()
-                        }
-
-                        else -> {
-                            ButtonGroupDefaults.connectedMiddleButtonShapes()
-                        }
-                    },
-                modifier = Modifier.semantics { role = Role.RadioButton },
-            ) {
-                Text(
-                    stringResource(option.labelRes()),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-        }
+        ChoiceButtonGroup(
+            options = AppFilterMode.entries,
+            selected = mode,
+            onSelect = {
+                if (it != mode) {
+                    haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                    onModeChange(it)
+                }
+            },
+            label = { stringResource(it.labelRes()) },
+        )
         AnimatedContent(
             targetState = mode,
             transitionSpec = { fadeIn() togetherWith fadeOut() },
-            modifier = Modifier.padding(top = 8.dp),
+            modifier = Modifier.padding(horizontal = Tokens.SpacingLg),
             label = "filter-mode-summary",
         ) { target ->
             Text(

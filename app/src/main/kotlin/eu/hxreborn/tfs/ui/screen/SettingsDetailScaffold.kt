@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -30,23 +31,38 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.hxreborn.tfs.R
+import eu.hxreborn.tfs.ui.theme.Tokens
 
 private val ScreenGutter = 16.dp
+private val MaxContentWidth = 640.dp
+
+internal val GroupedListGutter = Tokens.ScreenHorizontalPadding
+
+internal val wideScreenInset: Dp
+    @Composable get() = ((LocalConfiguration.current.screenWidthDp.dp - MaxContentWidth) / 2).coerceAtLeast(0.dp)
+
+internal val TopBarInsets: WindowInsets
+    @Composable get() = TopAppBarDefaults.windowInsets.add(WindowInsets(left = wideScreenInset, right = wideScreenInset))
 
 internal val TopLevelInsets: WindowInsets
     @Composable get() = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
 
 @Composable
-internal fun PaddingValues.withScreenGutter(bottom: Dp = ScreenGutter): PaddingValues {
+internal fun PaddingValues.withScreenGutter(
+    bottom: Dp = ScreenGutter,
+    horizontal: Dp = ScreenGutter,
+): PaddingValues {
     val direction = LocalLayoutDirection.current
+    val inset = wideScreenInset
     return PaddingValues(
-        start = calculateStartPadding(direction) + ScreenGutter,
-        end = calculateEndPadding(direction) + ScreenGutter,
+        start = calculateStartPadding(direction) + horizontal + inset,
+        end = calculateEndPadding(direction) + horizontal + inset,
         top = calculateTopPadding(),
         bottom = calculateBottomPadding() + bottom,
     )
@@ -71,6 +87,7 @@ internal fun DetailTopBar(
             }
         },
         actions = actions,
+        windowInsets = TopBarInsets,
         scrollBehavior = scrollBehavior,
     )
 }
@@ -82,6 +99,7 @@ internal fun SettingsDetailScaffold(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     actions: @Composable RowScope.() -> Unit = {},
+    gutter: Dp = ScreenGutter,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -96,7 +114,7 @@ internal fun SettingsDetailScaffold(
                     .fillMaxSize()
                     .consumeWindowInsets(innerPadding)
                     .verticalScroll(rememberScrollState())
-                    .padding(innerPadding.withScreenGutter())
+                    .padding(innerPadding.withScreenGutter(horizontal = gutter))
                     .padding(top = 8.dp),
             content = content,
         )
