@@ -62,7 +62,6 @@
   <string name="about_whats_new_summary">Release notes for %1$s</string>
   <string name="about_changelog">Changelog</string>
   <string name="about_changelog_summary">Notes for every release</string>
-  <string name="about_changelog_open">See all releases</string>
   <string name="about_source_code">Source code</string>
   <string name="about_source_code_summary">hxreborn/three-finger-swipe on GitHub</string>
   <string name="about_report_issue">Suggest a feature or report a bug</string>
@@ -84,6 +83,17 @@
   <string name="changelog_pre_release">Pre-release</string>
   <string name="changelog_jump_top">Jump to top</string>
   <string name="changelog_jump_bottom">Jump to bottom</string>
+  <string name="changelog_see_full">See full changelog</string>
+  <string name="whats_new_title">What\'s new in %1$s</string>
+  <string name="whats_new_released">Released %1$s</string>
+  <string name="whats_new_missing">This version is not in the changelog</string>
+  <string name="close">Close</string>
+  <string name="notes_new">New</string>
+  <string name="notes_fixed">Fixed</string>
+  <string name="notes_changed">Changed</string>
+  <string name="notes_updated">Updated</string>
+  <string name="notes_removed">Removed</string>
+  <string name="notes_other">Other</string>
 
   <string name="action_no_action">No action</string>
   <string name="action_screenshot">Take screenshot</string>

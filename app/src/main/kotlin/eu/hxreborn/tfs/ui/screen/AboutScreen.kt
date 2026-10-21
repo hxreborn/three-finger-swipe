@@ -13,10 +13,13 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Android
 import androidx.compose.material.icons.outlined.Balance
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Coffee
 import androidx.compose.material.icons.outlined.Description
@@ -40,6 +43,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -299,26 +304,61 @@ private fun ButtonLabel(
     Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun WhatsNewSheet(
     onShowChangelog: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val note =
-        rememberReleaseNotes()?.let { notes ->
-            notes.firstOrNull { it.versionCode == BuildConfig.VERSION_CODE }
-                ?: notes.firstOrNull()
-        }
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    val notes = rememberReleaseNotes()
+    val installed = notes?.firstOrNull { it.versionCode == BuildConfig.VERSION_CODE }
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    ) {
         Column(
-            Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+            Modifier
+                .padding(start = 16.dp, end = 16.dp, bottom = 20.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text(stringResource(R.string.about_whats_new), style = MaterialTheme.typography.titleLarge)
-            if (note != null) ReleaseCard(note)
-            FilledTonalButton(onClick = onShowChangelog, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.about_changelog_open))
+            Column(Modifier.padding(top = 4.dp)) {
+                Text(
+                    stringResource(R.string.whats_new_title, BuildConfig.VERSION_NAME),
+                    style = MaterialTheme.typography.headlineSmallEmphasized,
+                )
+                installed?.releasedOn?.let {
+                    Text(
+                        stringResource(R.string.whats_new_released, formatReleaseDate(it)),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            when {
+                installed != null -> {
+                    ReleaseLines(installed)
+                }
+
+                notes != null -> {
+                    Text(
+                        stringResource(R.string.whats_new_missing),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            FlowRow(
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) {
+                    ButtonLabel(Icons.Outlined.Close, stringResource(R.string.close))
+                }
+                FilledTonalButton(onClick = onShowChangelog, shapes = ButtonDefaults.shapes()) {
+                    ButtonLabel(Icons.Outlined.History, stringResource(R.string.changelog_see_full))
+                }
             }
         }
     }

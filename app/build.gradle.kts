@@ -96,6 +96,9 @@ abstract class BundleReleaseNotes : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val notes: ConfigurableFileCollection
 
+    @get:Input
+    abstract val releaseDates: Property<String>
+
     @get:OutputDirectory
     abstract val outputDir: DirectoryProperty
 
@@ -105,6 +108,7 @@ abstract class BundleReleaseNotes : DefaultTask() {
         dest.deleteRecursively()
         dest.mkdirs()
         notes.forEach { it.copyTo(dest.resolve(it.name), overwrite = true) }
+        dest.resolve("dates.txt").writeText(releaseDates.get())
     }
 }
 
@@ -257,6 +261,25 @@ val generateXposedModuleProp by tasks.registering(GenerateXposedModuleProp::clas
 val bundleReleaseNotes by tasks.registering(BundleReleaseNotes::class) {
     notes.from(
         rootProject.fileTree("fastlane/metadata/android/en-US/changelogs") { include("*.txt") },
+    )
+    val stableTag = Regex("""^v(\d+)\.(\d+)\.(\d+) (\d{4}-\d{2}-\d{2})$""")
+    releaseDates.set(
+        providers
+            .provider {
+                runCatching {
+                    providers
+                        .exec {
+                            commandLine("git", "for-each-ref", "refs/tags", "--format=%(refname:short) %(creatordate:short)")
+                            isIgnoreExitValue = true
+                        }.standardOutput.asText
+                        .get()
+                }.getOrDefault("")
+            }.map { output ->
+                output.lines().mapNotNull { stableTag.find(it.trim())?.destructured }.joinToString("") {
+                    (major, minor, patch, date) ->
+                    "${major.toInt() * 10000 + minor.toInt() * 100 + patch.toInt() * 10 + 9} $date\n"
+                }
+            },
     )
 }
 
